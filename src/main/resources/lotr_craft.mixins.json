@@ -4,6 +4,9 @@
   "package": "org.neelemv.lotr_craft.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "AbstractContainerMenuInvoker",
+    "InventoryMenuMixin",
+    "PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
