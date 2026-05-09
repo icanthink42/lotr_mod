@@ -1,15 +1,15 @@
 {
   "attributes": {
     "minecraft:visual/sky_color": "#78a7ff",
-    "minecraft:visual/water_fog_color": "#050533"
+    "minecraft:visual/water_fog_color": "#173c2d"
   },
   "carvers": [],
   "downfall": 0.8,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#71882e",
-    "foliage_color": "#5a7e2e",
-    "dry_foliage_color": "#85853a"
+    "dry_foliage_color": "#85853a",
+    "foliage_color": "#7fd13c",
+    "grass_color": "#a1db3d",
+    "water_color": "#3ea077"
   },
   "features": [
     [],

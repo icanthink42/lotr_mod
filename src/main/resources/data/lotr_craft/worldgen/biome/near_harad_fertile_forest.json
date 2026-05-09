@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 1.0,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#698432",
+    "dry_foliage_color": "#81833c",
     "foliage_color": "#557b31",
-    "dry_foliage_color": "#81833c"
+    "grass_color": "#b5ce35",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
