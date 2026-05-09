@@ -44,25 +44,7 @@ fi
 export JAVA_HOME="$java_home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
-if [[ -x ./gradlew ]]; then
-    gradle_cmd=(./gradlew)
-else
-    gradle_version="9.4.0"
-    gradle_dir="$script_dir/.gradle-build/gradle-$gradle_version"
-    gradle_zip="$script_dir/.gradle-build/gradle-$gradle_version-bin.zip"
-
-    if [[ ! -x "$gradle_dir/bin/gradle" ]]; then
-        mkdir -p "$script_dir/.gradle-build"
-        curl --fail --location --output "$gradle_zip" \
-            "https://services.gradle.org/distributions/gradle-$gradle_version-bin.zip"
-        unzip -q "$gradle_zip" -d "$script_dir/.gradle-build"
-        rm -f "$gradle_zip"
-    fi
-
-    gradle_cmd=("$gradle_dir/bin/gradle")
-fi
-
-"${gradle_cmd[@]}" build
+./gradlew build
 
 mkdir -p "$export_path"
 
