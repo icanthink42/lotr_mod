@@ -3,6 +3,7 @@ package org.neelemv.lotr_craft.client.gui;
 import org.neelemv.lotr_craft.client.LotrKeyMappings;
 import org.neelemv.lotr_craft.network.MiddleEarthMapTeleportPayload;
 import org.neelemv.lotr_craft.worldgen.MiddleEarthMapConstants;
+import org.neelemv.lotr_craft.worldgen.MiddleEarthRoads;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,8 @@ public final class MiddleEarthMapScreen extends Screen {
     private static final int MARKER_COLOR = 0xFFFFFFFF;
     private static final int LABEL_COLOR = 0xFFFFFF;
     private static final int LABEL_SHADOW_COLOR = 0x000000;
+    private static final int ROAD_COLOR = 0xB0352414;
+    private static final int ROAD_SHADOW_COLOR = 0x8030180A;
     private static final int RIGHT_MOUSE_BUTTON = 1;
     private static final float MIN_ZOOM = 1.0F;
     private static final float MAX_ZOOM = 16.0F;
@@ -65,6 +68,7 @@ public final class MiddleEarthMapScreen extends Screen {
         graphics.blit(RenderPipelines.GUI_TEXTURED, mapTexture, 0, 0, 0.0F, 0.0F, textureWidth, textureHeight, textureWidth, textureHeight);
         graphics.pose().popMatrix();
 
+        drawRoads(graphics, x, y, drawWidth, drawHeight, scale);
         drawMapLabels(graphics, x, y, drawWidth, drawHeight, scale);
         drawPlayerMarker(graphics, x, y, drawWidth, drawHeight);
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
@@ -189,6 +193,52 @@ public final class MiddleEarthMapScreen extends Screen {
         float minPan = MIN_VISIBLE_MAP_PIXELS - base - drawSize;
         float maxPan = screenSize - MIN_VISIBLE_MAP_PIXELS - base;
         return Mth.clamp(pan, minPan, maxPan);
+    }
+
+    private void drawRoads(GuiGraphicsExtractor graphics, int mapX, int mapY, int mapWidth, int mapHeight, float scale) {
+        float roadAlpha = Mth.clamp(((float) (Math.log(scale) / Math.log(2.0)) + 3.3F) / 2.2F, 0.0F, 1.0F);
+        if (roadAlpha <= 0.0F) {
+            return;
+        }
+
+        double minMapX = (Math.max(0, -mapX) / (double) scale) - 8.0D;
+        double minMapZ = (Math.max(0, -mapY) / (double) scale) - 8.0D;
+        double maxMapX = ((Math.min(width, mapX + mapWidth) - mapX) / (double) scale) + 8.0D;
+        double maxMapZ = ((Math.min(height, mapY + mapHeight) - mapY) / (double) scale) + 8.0D;
+        double minBlockX = (minMapX - MiddleEarthMapConstants.MAP_ORIGIN_X) * MiddleEarthMapConstants.MAP_SCALE;
+        double minBlockZ = (minMapZ - MiddleEarthMapConstants.MAP_ORIGIN_Z) * MiddleEarthMapConstants.MAP_SCALE;
+        double maxBlockX = (maxMapX - MiddleEarthMapConstants.MAP_ORIGIN_X) * MiddleEarthMapConstants.MAP_SCALE;
+        double maxBlockZ = (maxMapZ - MiddleEarthMapConstants.MAP_ORIGIN_Z) * MiddleEarthMapConstants.MAP_SCALE;
+
+        int pointStep = Math.max(1, Math.round(24.0F / Math.max(scale, 0.05F)));
+        int roadHalfWidth = Math.max(1, Math.round(scale * 1.4F));
+        int roadColor = ((int) (roadAlpha * 176.0F) << 24) | (ROAD_COLOR & 0xFFFFFF);
+        int shadowColor = ((int) (roadAlpha * 128.0F) << 24) | (ROAD_SHADOW_COLOR & 0xFFFFFF);
+
+        graphics.enableScissor(
+                Math.max(0, mapX),
+                Math.max(0, mapY),
+                Math.min(width, mapX + mapWidth),
+                Math.min(height, mapY + mapHeight));
+
+        for (MiddleEarthRoads.Road road : MiddleEarthRoads.allRoadsForDisplay()) {
+            if (!road.intersectsBlockBounds(minBlockX, minBlockZ, maxBlockX, maxBlockZ)) {
+                continue;
+            }
+            MiddleEarthRoads.RoadPoint[] points = road.roadPoints();
+            for (int i = 0; i < points.length; i += pointStep) {
+                MiddleEarthRoads.RoadPoint point = points[i];
+                int x = mapX + (int) Math.round(point.mapX() * scale);
+                int y = mapY + (int) Math.round(point.mapZ() * scale);
+                if (x < mapX || x >= mapX + mapWidth || y < mapY || y >= mapY + mapHeight) {
+                    continue;
+                }
+                graphics.fill(x - roadHalfWidth, y - roadHalfWidth, x + roadHalfWidth + 1, y + roadHalfWidth + 1, shadowColor);
+                graphics.fill(x - roadHalfWidth + 1, y - roadHalfWidth + 1, x + roadHalfWidth, y + roadHalfWidth, roadColor);
+            }
+        }
+
+        graphics.disableScissor();
     }
 
     private void drawMapLabels(GuiGraphicsExtractor graphics, int mapX, int mapY, int mapWidth, int mapHeight, float scale) {
