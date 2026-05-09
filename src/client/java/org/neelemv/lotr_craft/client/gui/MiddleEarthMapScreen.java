@@ -22,9 +22,11 @@ public final class MiddleEarthMapScreen extends Screen {
     private static final int INNER_FRAME_COLOR = 0xFF5B3F1D;
     private static final int MARKER_OUTLINE = 0xFF000000;
     private static final int MARKER_COLOR = 0xFFFFFFFF;
+    private static final int LABEL_COLOR = 0xFFFFFF;
+    private static final int LABEL_SHADOW_COLOR = 0x000000;
     private static final int RIGHT_MOUSE_BUTTON = 1;
     private static final float MIN_ZOOM = 1.0F;
-    private static final float MAX_ZOOM = 8.0F;
+    private static final float MAX_ZOOM = 16.0F;
     private static final int MAP_MARGIN = 18;
     private static final int MIN_VISIBLE_MAP_PIXELS = 48;
 
@@ -63,6 +65,7 @@ public final class MiddleEarthMapScreen extends Screen {
         graphics.blit(RenderPipelines.GUI_TEXTURED, mapTexture, 0, 0, 0.0F, 0.0F, textureWidth, textureHeight, textureWidth, textureHeight);
         graphics.pose().popMatrix();
 
+        drawMapLabels(graphics, x, y, drawWidth, drawHeight, scale);
         drawPlayerMarker(graphics, x, y, drawWidth, drawHeight);
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
@@ -186,6 +189,47 @@ public final class MiddleEarthMapScreen extends Screen {
         float minPan = MIN_VISIBLE_MAP_PIXELS - base - drawSize;
         float maxPan = screenSize - MIN_VISIBLE_MAP_PIXELS - base;
         return Mth.clamp(pan, minPan, maxPan);
+    }
+
+    private void drawMapLabels(GuiGraphicsExtractor graphics, int mapX, int mapY, int mapWidth, int mapHeight, float scale) {
+        float zoomExp = (float) (Math.log(scale) / Math.log(2.0));
+        graphics.enableScissor(
+                Math.max(0, mapX - 256),
+                Math.max(0, mapY - 96),
+                Math.min(width, mapX + mapWidth + 256),
+                Math.min(height, mapY + mapHeight + 96));
+
+        for (MiddleEarthMapLabels.Label label : MiddleEarthMapLabels.ALL) {
+            float zoomLerp = (zoomExp - label.minZoom()) / (label.maxZoom() - label.minZoom());
+            if (zoomLerp <= 0.0F || zoomLerp >= 1.0F) {
+                continue;
+            }
+
+            float alpha = (0.5F - Math.abs(zoomLerp - 0.5F)) / 0.5F * 0.7F;
+            int alphaInt = Mth.clamp((int) (alpha * 255.0F), 4, 255);
+            int screenX = mapX + Math.round(label.x() * scale);
+            int screenY = mapY + Math.round(label.y() * scale);
+            if (screenX < mapX - 200 || screenX > mapX + mapWidth + 200 || screenY < mapY - 80 || screenY > mapY + mapHeight + 80) {
+                continue;
+            }
+
+            var text = label.text();
+            float labelScale = Math.max(0.35F, label.scale() * scale);
+            int textX = -Math.round(font.width(text) * 0.5F);
+            int textY = -Math.round(font.lineHeight * 0.5F);
+            int color = alphaInt << 24 | LABEL_COLOR;
+            int shadow = alphaInt << 24 | LABEL_SHADOW_COLOR;
+
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(screenX, screenY);
+            graphics.pose().rotate((float) Math.toRadians(label.angle()));
+            graphics.pose().scale(labelScale, labelScale);
+            graphics.text(font, text, textX + 1, textY + 1, shadow, false);
+            graphics.text(font, text, textX, textY, color, false);
+            graphics.pose().popMatrix();
+        }
+
+        graphics.disableScissor();
     }
 
     private static void drawPlayerMarker(GuiGraphicsExtractor graphics, int mapX, int mapY, int mapWidth, int mapHeight) {
