@@ -34,13 +34,3 @@ The script will:
 - Copy the built jar into the configured `mods` folder
 
 After it finishes, launch the Minecraft instance with Fabric Loader.
-
-## Fabric 26.1 Notes
-
-Minecraft 26.1 is unobfuscated. This project uses Fabric's 26.1 Loom plugin:
-
-```gradle
-id 'net.fabricmc.fabric-loom'
-```
-
-There is no `mappings` dependency in `build.gradle` for 26.1.
