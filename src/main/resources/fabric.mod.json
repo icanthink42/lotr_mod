@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "lotr_craft",
+  "version": "${version}",
+  "name": "LOTR_Craft",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/lotr_craft/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.neelemv.lotr_craft.client.Lotr_craftDataGenerator"
+    ],
+    "client": [
+      "org.neelemv.lotr_craft.client.Lotr_craftClient"
+    ],
+    "main": [
+      "org.neelemv.lotr_craft.Lotr_craft"
+    ]
+  },
+  "mixins": [
+    "lotr_craft.mixins.json",
+    {
+      "config": "lotr_craft.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

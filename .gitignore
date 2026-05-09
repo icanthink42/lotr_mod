@@ -1,0 +1,17 @@
+# Local configuration
+.env
+
+# Gradle/build output
+.gradle/
+.gradle-home/
+.gradle-build/
+build/
+
+# Common IDE files
+.idea/
+*.iml
+
+# OS/editor noise
+.DS_Store
+*.swp
+*~
