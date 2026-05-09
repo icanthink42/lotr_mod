@@ -119,6 +119,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
         info.add("LOTR expected height: " + getTerrainHeight(pos.getX(), pos.getZ(), terrain));
+        info.add("LOTR river strength: " + String.format("%.3f", terrain.riverStrength()));
         info.add("LOTR mountain interior: " + String.format("%.3f", terrain.mountainInterior()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
@@ -143,13 +144,16 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
             landHeight = Math.max(getSeaLevel() - 2, raisedBase + broad * variation * mountainVariationScale + mountainDetail + mountainRidge);
         }
 
-        if (terrain.waterWeight() <= 0.0) {
-            return (int) Math.round(landHeight);
+        if (terrain.riverStrength() > 0.0) {
+            double river = clamp(terrain.riverStrength(), 0.0, 1.0);
+            double channel = smooth(clamp((river - 0.18) / 0.82, 0.0, 1.0));
+            double bank = smooth(river);
+            double riverBottom = getSeaLevel() - 4.0 - channel * 30.0 + noise(blockX, blockZ, 0.018, 1954L) * 2.0;
+            double bankHeight = landHeight - bank * 10.0;
+            landHeight = lerp(landHeight, Math.min(bankHeight, riverBottom), bank);
         }
 
-        double waterFloor = getSeaLevel() - 7 + noise(blockX, blockZ, 0.013, 1954L) * 4.0;
-        double waterBlend = smooth(Math.min(1.0, terrain.waterWeight()));
-        return (int) Math.round(lerp(landHeight, waterFloor, waterBlend));
+        return (int) Math.round(landHeight);
     }
 
     private static void fillColumn(ChunkAccess chunk, int localX, int localZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {

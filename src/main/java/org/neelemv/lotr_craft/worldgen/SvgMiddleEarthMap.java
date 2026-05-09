@@ -16,6 +16,8 @@ public final class SvgMiddleEarthMap {
     private static final String MAP_RESOURCE = "/assets/lotr_craft/map/map.png";
     private static final double TERRAIN_BLEND_RADIUS = 6.0;
     private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
+    private static final double RIVER_SEARCH_RADIUS = 3.0;
+    private static final int RIVER_SEARCH_CELL_RADIUS = 3;
     private static final int MOUNTAIN_DISTANCE_SCALE = 10;
     private static final int MOUNTAIN_DISTANCE_CAP = 40 * MOUNTAIN_DISTANCE_SCALE;
     private static final int MOUNTAIN_DISTANCE_STRAIGHT = 10;
@@ -92,12 +94,15 @@ public final class SvgMiddleEarthMap {
         }
 
         double inverseWeight = 1.0 / totalWeight;
+        double riverStrength = riverStrengthAtMapPosition(mapX, mapZ);
+        water = Math.max(water * inverseWeight, riverStrength);
         return new TerrainBlend(
                 MiddleEarthTerrainProfile.fromId(dominantId),
                 baseHeight * inverseWeight,
                 variation * inverseWeight,
                 roughness * inverseWeight,
-                water * inverseWeight,
+                water,
+                riverStrength,
                 mountainPeakHeight * inverseWeight,
                 mountainInterior * inverseWeight);
     }
@@ -113,6 +118,35 @@ public final class SvgMiddleEarthMap {
         }
         double normalized = 1.0 - distance / TERRAIN_BLEND_RADIUS;
         return normalized * normalized * (3.0 - 2.0 * normalized);
+    }
+
+    private double riverStrengthAtMapPosition(double mapX, double mapZ) {
+        int centerX = fastFloor(mapX);
+        int centerZ = fastFloor(mapZ);
+        double nearestWaterDistance = Double.POSITIVE_INFINITY;
+
+        for (int dz = -RIVER_SEARCH_CELL_RADIUS; dz <= RIVER_SEARCH_CELL_RADIUS; dz++) {
+            int sampleZ = centerZ + dz;
+            for (int dx = -RIVER_SEARCH_CELL_RADIUS; dx <= RIVER_SEARCH_CELL_RADIUS; dx++) {
+                int sampleX = centerX + dx;
+                MiddleEarthTerrainProfile profile = MiddleEarthTerrainProfile.fromId(profileIdAtMapPixel(sampleX, sampleZ));
+                if (!profile.water) {
+                    continue;
+                }
+                double sampleCenterX = sampleX + 0.5;
+                double sampleCenterZ = sampleZ + 0.5;
+                double distanceX = mapX - sampleCenterX;
+                double distanceZ = mapZ - sampleCenterZ;
+                double distance = Math.sqrt(distanceX * distanceX + distanceZ * distanceZ);
+                nearestWaterDistance = Math.min(nearestWaterDistance, distance);
+            }
+        }
+
+        if (nearestWaterDistance >= RIVER_SEARCH_RADIUS) {
+            return 0.0;
+        }
+        double strength = 1.0 - nearestWaterDistance / RIVER_SEARCH_RADIUS;
+        return strength * strength * (3.0 - 2.0 * strength);
     }
 
     private MiddleEarthTerrainProfile terrainAtMapPixel(double mapX, double mapZ) {
