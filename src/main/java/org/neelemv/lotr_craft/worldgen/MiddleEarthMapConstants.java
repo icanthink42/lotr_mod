@@ -1,7 +1,7 @@
 package org.neelemv.lotr_craft.worldgen;
 
 public final class MiddleEarthMapConstants {
-    public static final int MAP_SCALE = 128;
+    public static final double MAP_SCALE = 32.0;
     public static final int MAP_ORIGIN_X = 810;
     public static final int MAP_ORIGIN_Z = 730;
     public static final int MAP_WIDTH = 3200;
@@ -23,10 +23,10 @@ public final class MiddleEarthMapConstants {
     }
 
     public static int mapToBlockX(int mapX) {
-        return Math.round((mapX - MAP_ORIGIN_X) * MAP_SCALE);
+        return (int) Math.round((mapX - MAP_ORIGIN_X) * MAP_SCALE);
     }
 
     public static int mapToBlockZ(int mapZ) {
-        return Math.round((mapZ - MAP_ORIGIN_Z) * MAP_SCALE);
+        return (int) Math.round((mapZ - MAP_ORIGIN_Z) * MAP_SCALE);
     }
 }
