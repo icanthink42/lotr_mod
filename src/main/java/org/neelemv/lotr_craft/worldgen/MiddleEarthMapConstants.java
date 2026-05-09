@@ -7,6 +7,9 @@ public final class MiddleEarthMapConstants {
     public static final int MAP_WIDTH = 3200;
     public static final int MAP_HEIGHT = 4000;
     public static final int SEA_LEVEL = 62;
+    public static final int WORLD_MIN_Y = -64;
+    public static final int WORLD_HEIGHT = 2096;
+    public static final int WORLD_MAX_Y = WORLD_MIN_Y + WORLD_HEIGHT - 1;
 
     private MiddleEarthMapConstants() {
     }

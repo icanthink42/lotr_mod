@@ -14,13 +14,19 @@ import org.slf4j.LoggerFactory;
 public final class SvgMiddleEarthMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvgMiddleEarthMap.class);
     private static final String MAP_RESOURCE = "/assets/lotr_craft/map/map.png";
-    private static final double TERRAIN_BLEND_RADIUS = 1.35;
-    private static final int TERRAIN_BLEND_CELL_RADIUS = 2;
+    private static final double TERRAIN_BLEND_RADIUS = 6.0;
+    private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
+    private static final int MOUNTAIN_DISTANCE_SCALE = 10;
+    private static final int MOUNTAIN_DISTANCE_CAP = 40 * MOUNTAIN_DISTANCE_SCALE;
+    private static final int MOUNTAIN_DISTANCE_STRAIGHT = 10;
+    private static final int MOUNTAIN_DISTANCE_DIAGONAL = 14;
 
     private final byte[] terrainProfiles;
+    private final short[] mountainDistances;
 
-    private SvgMiddleEarthMap(byte[] terrainProfiles) {
+    private SvgMiddleEarthMap(byte[] terrainProfiles, short[] mountainDistances) {
         this.terrainProfiles = terrainProfiles;
+        this.mountainDistances = mountainDistances;
     }
 
     public static SvgMiddleEarthMap get() {
@@ -43,6 +49,8 @@ public final class SvgMiddleEarthMap {
         double variation = 0.0;
         double roughness = 0.0;
         double water = 0.0;
+        double mountainPeakHeight = 0.0;
+        double mountainInterior = 0.0;
         double[] profileWeights = new double[MiddleEarthTerrainProfile.count()];
 
         for (int dz = -TERRAIN_BLEND_CELL_RADIUS; dz <= TERRAIN_BLEND_CELL_RADIUS; dz++) {
@@ -64,6 +72,8 @@ public final class SvgMiddleEarthMap {
                 variation += profile.variation * weight;
                 roughness += profile.roughness * weight;
                 water += (profile.water ? 1.0 : 0.0) * weight;
+                mountainPeakHeight += profile.mountainPeakHeight() * weight;
+                mountainInterior += mountainInteriorAtMapPixel(sampleX, sampleZ) * weight;
                 profileWeights[profile.id()] += weight;
             }
         }
@@ -87,7 +97,9 @@ public final class SvgMiddleEarthMap {
                 baseHeight * inverseWeight,
                 variation * inverseWeight,
                 roughness * inverseWeight,
-                water * inverseWeight);
+                water * inverseWeight,
+                mountainPeakHeight * inverseWeight,
+                mountainInterior * inverseWeight);
     }
 
     public int colorAtMapPixel(int x, int z) {
@@ -114,6 +126,13 @@ public final class SvgMiddleEarthMap {
             return MiddleEarthTerrainProfile.OCEAN.id();
         }
         return terrainProfiles[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFF;
+    }
+
+    private double mountainInteriorAtMapPixel(int x, int z) {
+        if (x < 0 || x >= MiddleEarthMapConstants.MAP_WIDTH || z < 0 || z >= MiddleEarthMapConstants.MAP_HEIGHT) {
+            return 0.0;
+        }
+        return (mountainDistances[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFFFF) / (double) MOUNTAIN_DISTANCE_CAP;
     }
 
     private static SvgMiddleEarthMap load() {
@@ -150,8 +169,9 @@ public final class SvgMiddleEarthMap {
             if (!unknownColors.isEmpty()) {
                 LOGGER.warn("Found {} unknown colors in Middle-earth biome map; unknown pixels use ocean", unknownColors.size());
             }
+            short[] mountainDistances = buildMountainDistances(profiles);
             LOGGER.info("Loaded Middle-earth biome PNG: {} profile samples, {} biome definitions", profiles.length, MiddleEarthTerrainProfile.count());
-            return new SvgMiddleEarthMap(profiles);
+            return new SvgMiddleEarthMap(profiles, mountainDistances);
         } catch (Exception exception) {
             LOGGER.error("Failed to load Middle-earth biome PNG", exception);
             return empty();
@@ -161,7 +181,69 @@ public final class SvgMiddleEarthMap {
     private static SvgMiddleEarthMap empty() {
         byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
         Arrays.fill(profiles, (byte) MiddleEarthTerrainProfile.OCEAN.id());
-        return new SvgMiddleEarthMap(profiles);
+        return new SvgMiddleEarthMap(profiles, new short[profiles.length]);
+    }
+
+    private static short[] buildMountainDistances(byte[] profiles) {
+        int size = profiles.length;
+        int width = MiddleEarthMapConstants.MAP_WIDTH;
+        int height = MiddleEarthMapConstants.MAP_HEIGHT;
+        int[] distances = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            MiddleEarthTerrainProfile profile = MiddleEarthTerrainProfile.fromId(profiles[i] & 0xFF);
+            distances[i] = profile.mountainPeakHeight() > 0 ? MOUNTAIN_DISTANCE_CAP : 0;
+        }
+
+        for (int z = 0; z < height; z++) {
+            int row = z * width;
+            for (int x = 0; x < width; x++) {
+                int index = row + x;
+                int distance = distances[index];
+                if (x > 0) {
+                    distance = Math.min(distance, distances[index - 1] + MOUNTAIN_DISTANCE_STRAIGHT);
+                }
+                if (z > 0) {
+                    int previousRow = index - width;
+                    distance = Math.min(distance, distances[previousRow] + MOUNTAIN_DISTANCE_STRAIGHT);
+                    if (x > 0) {
+                        distance = Math.min(distance, distances[previousRow - 1] + MOUNTAIN_DISTANCE_DIAGONAL);
+                    }
+                    if (x < width - 1) {
+                        distance = Math.min(distance, distances[previousRow + 1] + MOUNTAIN_DISTANCE_DIAGONAL);
+                    }
+                }
+                distances[index] = Math.min(distance, MOUNTAIN_DISTANCE_CAP);
+            }
+        }
+
+        for (int z = height - 1; z >= 0; z--) {
+            int row = z * width;
+            for (int x = width - 1; x >= 0; x--) {
+                int index = row + x;
+                int distance = distances[index];
+                if (x < width - 1) {
+                    distance = Math.min(distance, distances[index + 1] + MOUNTAIN_DISTANCE_STRAIGHT);
+                }
+                if (z < height - 1) {
+                    int nextRow = index + width;
+                    distance = Math.min(distance, distances[nextRow] + MOUNTAIN_DISTANCE_STRAIGHT);
+                    if (x > 0) {
+                        distance = Math.min(distance, distances[nextRow - 1] + MOUNTAIN_DISTANCE_DIAGONAL);
+                    }
+                    if (x < width - 1) {
+                        distance = Math.min(distance, distances[nextRow + 1] + MOUNTAIN_DISTANCE_DIAGONAL);
+                    }
+                }
+                distances[index] = Math.min(distance, MOUNTAIN_DISTANCE_CAP);
+            }
+        }
+
+        short[] packedDistances = new short[size];
+        for (int i = 0; i < size; i++) {
+            packedDistances[i] = (short) distances[i];
+        }
+        return packedDistances;
     }
 
     private static int fastFloor(double value) {

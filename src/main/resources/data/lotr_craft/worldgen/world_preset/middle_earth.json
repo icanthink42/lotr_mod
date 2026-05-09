@@ -1,7 +1,7 @@
 {
   "dimensions": {
     "minecraft:overworld": {
-      "type": "minecraft:overworld",
+      "type": "lotr_craft:middle_earth",
       "generator": {
         "type": "lotr_craft:middle_earth",
         "biome_source": {

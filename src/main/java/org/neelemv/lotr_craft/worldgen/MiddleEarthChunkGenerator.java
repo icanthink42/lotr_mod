@@ -81,12 +81,12 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getMinY() {
-        return -64;
+        return MiddleEarthMapConstants.WORLD_MIN_Y;
     }
 
     @Override
     public int getGenDepth() {
-        return 384;
+        return MiddleEarthMapConstants.WORLD_HEIGHT;
     }
 
     @Override
@@ -116,7 +116,10 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     @Override
     public void addDebugScreenInfo(List<String> info, RandomState randomState, BlockPos pos) {
         MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainAtBlock(pos.getX(), pos.getZ());
+        TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
+        info.add("LOTR expected height: " + getTerrainHeight(pos.getX(), pos.getZ(), terrain));
+        info.add("LOTR mountain interior: " + String.format("%.3f", terrain.mountainInterior()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
 
@@ -124,8 +127,21 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         double broad = noise(blockX, blockZ, 0.0028, 1954L);
         double detail = noise(blockX, blockZ, 0.018, 1955L);
         double ridge = 1.0 - Math.abs(noise(blockX, blockZ, 0.006, 1956L));
-        double shaped = broad * terrain.variation() + detail * terrain.roughness() + ridge * terrain.roughness() * 0.75;
-        double landHeight = Math.max(getSeaLevel() - 2, terrain.baseHeight() + shaped);
+        double interior = terrain.mountainPeakHeight() > 0.0 ? smooth(clamp(terrain.mountainInterior(), 0.0, 1.0)) : 0.0;
+        double baseHeight = terrain.mountainPeakHeight() > 0.0 ? lerp(getSeaLevel() + 6.0, terrain.baseHeight(), interior) : terrain.baseHeight();
+        double variation = terrain.mountainPeakHeight() > 0.0 ? lerp(8.0, terrain.variation(), interior) : terrain.variation();
+        double roughness = terrain.mountainPeakHeight() > 0.0 ? lerp(6.0, terrain.roughness(), interior) : terrain.roughness();
+        double shaped = broad * variation + detail * roughness + ridge * roughness * 0.75;
+        double landHeight = Math.max(getSeaLevel() - 2, baseHeight + shaped);
+
+        if (terrain.mountainPeakHeight() > 0.0) {
+            double mountainTarget = Math.min(MiddleEarthMapConstants.WORLD_MAX_Y - 1.0, terrain.mountainPeakHeight());
+            double raisedBase = baseHeight + (mountainTarget - baseHeight) * interior;
+            double mountainVariationScale = 1.0 + interior * 3.5;
+            double mountainRidge = (1.0 - Math.abs(noise(blockX, blockZ, 0.0052, 1982L))) * roughness * interior * 2.5;
+            double mountainDetail = detail * roughness * mountainVariationScale;
+            landHeight = Math.max(getSeaLevel() - 2, raisedBase + broad * variation * mountainVariationScale + mountainDetail + mountainRidge);
+        }
 
         if (terrain.waterWeight() <= 0.0) {
             return (int) Math.round(landHeight);
@@ -238,5 +254,9 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
 
     private static double lerp(double a, double b, double delta) {
         return a + (b - a) * delta;
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

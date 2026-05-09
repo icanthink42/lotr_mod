@@ -246,6 +246,26 @@ enum MiddleEarthTerrainProfile {
         return fromId(id).mapColor();
     }
 
+    int mountainPeakHeight() {
+        return switch (this) {
+            case MISTY_MOUNTAINS -> MiddleEarthMapConstants.WORLD_MAX_Y - 1;
+            case MISTY_MOUNTAINS_FOOTHILLS -> 640;
+            case WHITE_MOUNTAINS -> 1650;
+            case WHITE_MOUNTAINS_FOOTHILLS -> 620;
+            case GREY_MOUNTAINS, FORODWAITH_MOUNTAINS -> 1550;
+            case GREY_MOUNTAINS_FOOTHILLS, BLUE_MOUNTAINS_FOOTHILLS, RED_MOUNTAINS_FOOTHILLS, WIND_MOUNTAINS_FOOTHILLS -> 560;
+            case BLUE_MOUNTAINS -> 1350;
+            case RED_MOUNTAINS, WIND_MOUNTAINS -> 1280;
+            case MORDOR_MOUNTAINS -> 1500;
+            case ANGMAR_MOUNTAINS -> 1200;
+            case HARAD_MOUNTAINS, FAR_HARAD_JUNGLE_MOUNTAINS -> 1100;
+            case MIRKWOOD_MOUNTAINS -> 950;
+            case RIVENDELL_HILLS -> 900;
+            case IRON_HILLS, LONE_LANDS_HILLS, EREBOR, PINNATH_GELIN, TOLFALAS, RHUN_LAND_HILLS, FAR_HARAD_ARID_HILLS, FAR_HARAD_BUSHLAND_HILLS, UMBAR_HILLS, LAMEDON_HILLS, WOODLAND_REALM_HILLS, ITHILIEN_HILLS, DOR_EN_ERNIL_HILLS, DORWINION_HILLS -> 520;
+            default -> 0;
+        };
+    }
+
     private static Map<Integer, MiddleEarthTerrainProfile> buildColorMap() {
         Map<Integer, MiddleEarthTerrainProfile> profiles = new HashMap<>();
         for (MiddleEarthTerrainProfile profile : values()) {
