@@ -1,0 +1,14 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "lotr_craft:middle_earth",
+        "biome_source": {
+          "type": "minecraft:fixed",
+          "biome": "minecraft:plains"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,9 @@
 {
   "itemGroup.lotr_craft": "LOTR Craft",
   "item.lotr_craft.gold_ring": "Gold Ring",
+  "item.lotr_craft.middle_earth_map": "Map of Middle-earth",
+  "screen.lotr_craft.middle_earth_map": "Map of Middle-earth",
+  "key.categories.lotr_craft.controls": "LOTR Craft",
+  "key.lotr_craft.map_teleport": "Teleport on Middle-earth Map",
   "item.lotr_craft.the_one_ring": "The One Ring"
 }
