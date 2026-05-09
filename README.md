@@ -8,8 +8,6 @@ Fabric mod for Minecraft Java Edition 26.1.2.
 - `curl` and `unzip`
 - A Fabric 26.1.2 Minecraft instance, such as MultiMC or Prism Launcher
 
-The build script downloads Gradle 9.4.0 into `.gradle-build/` if no Gradle wrapper is present.
-
 ## Setup
 
 Create a `.env` file in the project root with the path to your instance's `mods` folder:
