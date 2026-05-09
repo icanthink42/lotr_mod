@@ -1,31 +1,21 @@
 package org.neelemv.lotr_craft.worldgen;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public final class SvgMiddleEarthMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvgMiddleEarthMap.class);
-    private static final String MAP_RESOURCE = "/assets/map/lotr.svg";
+    private static final String MAP_RESOURCE = "/assets/lotr_craft/map/map.png";
     private static final double TERRAIN_BLEND_RADIUS = 1.35;
     private static final int TERRAIN_BLEND_CELL_RADIUS = 2;
-    private static final SvgMiddleEarthMap INSTANCE = load();
 
     private final byte[] terrainProfiles;
 
@@ -34,7 +24,7 @@ public final class SvgMiddleEarthMap {
     }
 
     public static SvgMiddleEarthMap get() {
-        return INSTANCE;
+        return Holder.INSTANCE;
     }
 
     MiddleEarthTerrainProfile terrainAtBlock(int blockX, int blockZ) {
@@ -126,35 +116,6 @@ public final class SvgMiddleEarthMap {
         return terrainProfiles[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFF;
     }
 
-    private static byte[] rasterizeProfiles(List<ShapeEntry> shapes) {
-        BufferedImage image = new BufferedImage(
-                MiddleEarthMapConstants.MAP_WIDTH,
-                MiddleEarthMapConstants.MAP_HEIGHT,
-                BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        try {
-            graphics.setComposite(AlphaComposite.Src);
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-            graphics.setColor(new Color(MiddleEarthTerrainProfile.OCEAN.id(), 0, 0));
-            graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
-            for (ShapeEntry shape : shapes) {
-                graphics.setColor(new Color(shape.profile.id(), 0, 0));
-                graphics.fill(shape.path);
-            }
-        } finally {
-            graphics.dispose();
-        }
-
-        byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
-        int offset = 0;
-        for (int z = 0; z < MiddleEarthMapConstants.MAP_HEIGHT; z++) {
-            for (int x = 0; x < MiddleEarthMapConstants.MAP_WIDTH; x++) {
-                profiles[offset++] = (byte) (image.getRGB(x, z) >> 16 & 0xFF);
-            }
-        }
-        return profiles;
-    }
-
     private static SvgMiddleEarthMap load() {
         try (InputStream stream = SvgMiddleEarthMap.class.getResourceAsStream(MAP_RESOURCE)) {
             if (stream == null) {
@@ -162,66 +123,45 @@ public final class SvgMiddleEarthMap {
                 return empty();
             }
 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            factory.setExpandEntityReferences(false);
-            Document document = factory.newDocumentBuilder().parse(stream);
-            NodeList paths = document.getElementsByTagName("path");
-            List<ShapeEntry> shapes = new ArrayList<>(paths.getLength());
-
-            for (int i = 0; i < paths.getLength(); i++) {
-                Element path = (Element) paths.item(i);
-                String fill = findFill(path);
-                String d = path.getAttribute("d");
-                if (fill == null || d == null || d.isBlank()) {
-                    continue;
-                }
-                int color = Integer.parseInt(fill.substring(1), 16);
-                shapes.add(new ShapeEntry(parsePath(d), MiddleEarthTerrainProfile.fromColor(color)));
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                LOGGER.warn("Failed to decode {}, Middle-earth terrain will fall back to ocean", MAP_RESOURCE);
+                return empty();
+            }
+            if (image.getWidth() != MiddleEarthMapConstants.MAP_WIDTH || image.getHeight() != MiddleEarthMapConstants.MAP_HEIGHT) {
+                LOGGER.warn("Ignoring Middle-earth biome map with unexpected size {}x{}", image.getWidth(), image.getHeight());
+                return empty();
             }
 
-            long started = System.nanoTime();
-            byte[] profiles = rasterizeProfiles(shapes);
-            LOGGER.info("Loaded Middle-earth terrain map: {} SVG paths rasterized to {} profile samples in {} ms",
-                    shapes.size(),
-                    profiles.length,
-                    (System.nanoTime() - started) / 1_000_000L);
+            byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
+            Set<Integer> unknownColors = new HashSet<>();
+            int offset = 0;
+            for (int z = 0; z < MiddleEarthMapConstants.MAP_HEIGHT; z++) {
+                for (int x = 0; x < MiddleEarthMapConstants.MAP_WIDTH; x++) {
+                    int argb = image.getRGB(x, z) | 0xFF000000;
+                    MiddleEarthTerrainProfile profile = MiddleEarthTerrainProfile.fromMapColor(argb);
+                    if (profile == MiddleEarthTerrainProfile.OCEAN && argb != (MiddleEarthTerrainProfile.OCEAN.mapColor() | 0xFF000000)) {
+                        unknownColors.add(argb);
+                    }
+                    profiles[offset++] = (byte) profile.id();
+                }
+            }
+
+            if (!unknownColors.isEmpty()) {
+                LOGGER.warn("Found {} unknown colors in Middle-earth biome map; unknown pixels use ocean", unknownColors.size());
+            }
+            LOGGER.info("Loaded Middle-earth biome PNG: {} profile samples, {} biome definitions", profiles.length, MiddleEarthTerrainProfile.count());
             return new SvgMiddleEarthMap(profiles);
         } catch (Exception exception) {
-            LOGGER.error("Failed to load Middle-earth SVG map", exception);
+            LOGGER.error("Failed to load Middle-earth biome PNG", exception);
             return empty();
         }
     }
 
     private static SvgMiddleEarthMap empty() {
         byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
+        Arrays.fill(profiles, (byte) MiddleEarthTerrainProfile.OCEAN.id());
         return new SvgMiddleEarthMap(profiles);
-    }
-
-    private static String findFill(Element path) {
-        String fill = path.getAttribute("fill");
-        if (isHexColor(fill)) {
-            return fill;
-        }
-        String style = path.getAttribute("style");
-        for (String part : style.split(";")) {
-            String trimmed = part.trim();
-            if (trimmed.startsWith("fill:")) {
-                String value = trimmed.substring("fill:".length()).trim();
-                return isHexColor(value) ? value : null;
-            }
-        }
-        return null;
-    }
-
-    private static boolean isHexColor(String value) {
-        return value != null && value.matches("#[0-9a-fA-F]{6}");
-    }
-
-    private static Path2D.Double parsePath(String d) {
-        PathParser parser = new PathParser(d);
-        return parser.parse();
     }
 
     private static int fastFloor(double value) {
@@ -229,209 +169,7 @@ public final class SvgMiddleEarthMap {
         return value < i ? i - 1 : i;
     }
 
-    private record ShapeEntry(Path2D.Double path, MiddleEarthTerrainProfile profile) {
-    }
-
-    private static final class PathParser {
-        private final String input;
-        private int index;
-        private double x;
-        private double y;
-        private double subPathX;
-        private double subPathY;
-
-        private PathParser(String input) {
-            this.input = input;
-        }
-
-        private Path2D.Double parse() {
-            Path2D.Double path = new Path2D.Double(Path2D.WIND_NON_ZERO);
-            char command = 0;
-            while (skipSeparators()) {
-                if (isCommand(peek())) {
-                    command = input.charAt(index++);
-                } else if (command == 0) {
-                    throw new IllegalArgumentException("SVG path starts without command");
-                }
-                command = apply(path, command);
-            }
-            return path;
-        }
-
-        private char apply(Path2D.Double path, char command) {
-            boolean relative = Character.isLowerCase(command);
-            char upper = Character.toUpperCase(command);
-            switch (upper) {
-                case 'M' -> {
-                    double nx = nextNumber();
-                    double ny = nextNumber();
-                    if (relative) {
-                        nx += x;
-                        ny += y;
-                    }
-                    path.moveTo(nx, ny);
-                    x = subPathX = nx;
-                    y = subPathY = ny;
-                    while (hasNumberAhead()) {
-                        lineTo(path, nextNumber(), nextNumber(), relative);
-                    }
-                    return relative ? 'l' : 'L';
-                }
-                case 'L' -> {
-                    while (hasNumberAhead()) {
-                        lineTo(path, nextNumber(), nextNumber(), relative);
-                    }
-                }
-                case 'H' -> {
-                    while (hasNumberAhead()) {
-                        double nx = nextNumber();
-                        if (relative) {
-                            nx += x;
-                        }
-                        path.lineTo(nx, y);
-                        x = nx;
-                    }
-                }
-                case 'V' -> {
-                    while (hasNumberAhead()) {
-                        double ny = nextNumber();
-                        if (relative) {
-                            ny += y;
-                        }
-                        path.lineTo(x, ny);
-                        y = ny;
-                    }
-                }
-                case 'C' -> {
-                    while (hasNumberAhead()) {
-                        double x1 = adjustedX(nextNumber(), relative);
-                        double y1 = adjustedY(nextNumber(), relative);
-                        double x2 = adjustedX(nextNumber(), relative);
-                        double y2 = adjustedY(nextNumber(), relative);
-                        double nx = adjustedX(nextNumber(), relative);
-                        double ny = adjustedY(nextNumber(), relative);
-                        path.curveTo(x1, y1, x2, y2, nx, ny);
-                        x = nx;
-                        y = ny;
-                    }
-                }
-                case 'S' -> {
-                    while (hasNumberAhead()) {
-                        double x2 = adjustedX(nextNumber(), relative);
-                        double y2 = adjustedY(nextNumber(), relative);
-                        double nx = adjustedX(nextNumber(), relative);
-                        double ny = adjustedY(nextNumber(), relative);
-                        path.curveTo(x, y, x2, y2, nx, ny);
-                        x = nx;
-                        y = ny;
-                    }
-                }
-                case 'Q' -> {
-                    while (hasNumberAhead()) {
-                        double x1 = adjustedX(nextNumber(), relative);
-                        double y1 = adjustedY(nextNumber(), relative);
-                        double nx = adjustedX(nextNumber(), relative);
-                        double ny = adjustedY(nextNumber(), relative);
-                        path.quadTo(x1, y1, nx, ny);
-                        x = nx;
-                        y = ny;
-                    }
-                }
-                case 'T' -> {
-                    while (hasNumberAhead()) {
-                        double nx = adjustedX(nextNumber(), relative);
-                        double ny = adjustedY(nextNumber(), relative);
-                        path.quadTo(x, y, nx, ny);
-                        x = nx;
-                        y = ny;
-                    }
-                }
-                case 'A' -> {
-                    while (hasNumberAhead()) {
-                        nextNumber();
-                        nextNumber();
-                        nextNumber();
-                        nextNumber();
-                        nextNumber();
-                        lineTo(path, nextNumber(), nextNumber(), relative);
-                    }
-                }
-                case 'Z' -> {
-                    path.closePath();
-                    x = subPathX;
-                    y = subPathY;
-                }
-                default -> throw new IllegalArgumentException("Unsupported SVG path command " + command);
-            }
-            return command;
-        }
-
-        private void lineTo(Path2D.Double path, double nx, double ny, boolean relative) {
-            if (relative) {
-                nx += x;
-                ny += y;
-            }
-            path.lineTo(nx, ny);
-            x = nx;
-            y = ny;
-        }
-
-        private double adjustedX(double value, boolean relative) {
-            return relative ? x + value : value;
-        }
-
-        private double adjustedY(double value, boolean relative) {
-            return relative ? y + value : value;
-        }
-
-        private boolean hasNumberAhead() {
-            return skipSeparators() && !isCommand(peek());
-        }
-
-        private double nextNumber() {
-            skipSeparators();
-            int start = index;
-            if (peek() == '+' || peek() == '-') {
-                index++;
-            }
-            while (index < input.length() && Character.isDigit(input.charAt(index))) {
-                index++;
-            }
-            if (index < input.length() && input.charAt(index) == '.') {
-                index++;
-                while (index < input.length() && Character.isDigit(input.charAt(index))) {
-                    index++;
-                }
-            }
-            if (index < input.length() && (input.charAt(index) == 'e' || input.charAt(index) == 'E')) {
-                index++;
-                if (index < input.length() && (input.charAt(index) == '+' || input.charAt(index) == '-')) {
-                    index++;
-                }
-                while (index < input.length() && Character.isDigit(input.charAt(index))) {
-                    index++;
-                }
-            }
-            return Double.parseDouble(input.substring(start, index).toLowerCase(Locale.ROOT));
-        }
-
-        private boolean skipSeparators() {
-            while (index < input.length()) {
-                char c = input.charAt(index);
-                if (!Character.isWhitespace(c) && c != ',') {
-                    return true;
-                }
-                index++;
-            }
-            return false;
-        }
-
-        private char peek() {
-            return input.charAt(index);
-        }
-
-        private static boolean isCommand(char c) {
-            return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-        }
+    private static final class Holder {
+        private static final SvgMiddleEarthMap INSTANCE = load();
     }
 }

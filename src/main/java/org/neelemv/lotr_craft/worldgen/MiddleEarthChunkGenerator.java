@@ -32,8 +32,6 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     private static final BlockState STONE = Blocks.STONE.defaultBlockState();
     private static final BlockState WATER = Blocks.WATER.defaultBlockState();
 
-    private final SvgMiddleEarthMap map = SvgMiddleEarthMap.get();
-
     public MiddleEarthChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
     }
@@ -66,7 +64,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
             int blockX = chunkBlockX + localX;
             for (int localZ = 0; localZ < 16; localZ++) {
                 int blockZ = chunkBlockZ + localZ;
-                TerrainBlend terrain = map.terrainBlendAtBlock(blockX, blockZ);
+                TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(blockX, blockZ);
                 int surfaceY = getTerrainHeight(blockX, blockZ, terrain);
                 fillColumn(chunk, localX, localZ, surfaceY, minY, maxY, terrain);
             }
@@ -93,7 +91,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor heightAccessor, RandomState randomState) {
-        TerrainBlend terrain = map.terrainBlendAtBlock(x, z);
+        TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(x, z);
         int terrainHeight = getTerrainHeight(x, z, terrain);
         if (terrain.water()) {
             return Math.max(terrainHeight, getSeaLevel() + 1);
@@ -106,7 +104,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         int minY = heightAccessor.getMinY();
         int height = heightAccessor.getHeight();
         BlockState[] states = new BlockState[height];
-        TerrainBlend terrain = map.terrainBlendAtBlock(x, z);
+        TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(x, z);
         int surfaceY = getTerrainHeight(x, z, terrain);
         for (int i = 0; i < states.length; i++) {
             int y = minY + i;
@@ -117,8 +115,8 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public void addDebugScreenInfo(List<String> info, RandomState randomState, BlockPos pos) {
-        MiddleEarthTerrainProfile profile = map.terrainAtBlock(pos.getX(), pos.getZ());
-        info.add("LOTR terrain: " + profile.name().toLowerCase());
+        MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainAtBlock(pos.getX(), pos.getZ());
+        info.add("LOTR terrain: " + profile.debugName());
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
 
