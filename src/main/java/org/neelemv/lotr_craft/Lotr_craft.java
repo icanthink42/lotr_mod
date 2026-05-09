@@ -1,5 +1,6 @@
 package org.neelemv.lotr_craft;
 
+import org.neelemv.lotr_craft.block.LotrBlocks;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
 import org.neelemv.lotr_craft.item.TheOneRingItem;
@@ -31,6 +32,7 @@ public class Lotr_craft implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        LotrBlocks.register();
         LotrNetworking.register();
         LotrWorldgen.register();
     }
@@ -52,6 +54,17 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(GOLD_RING);
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
+                    output.accept(LotrBlocks.MORDOR_ROCK);
+                    output.accept(LotrBlocks.GONDOR_ROCK);
+                    output.accept(LotrBlocks.ROHAN_ROCK);
+                    output.accept(LotrBlocks.BLUE_ROCK);
+                    output.accept(LotrBlocks.RED_ROCK);
+                    output.accept(LotrBlocks.CHALK_ROCK);
+                    output.accept(LotrBlocks.MORDOR_DIRT);
+                    output.accept(LotrBlocks.MORDOR_GRAVEL);
+                    output.accept(LotrBlocks.MUD);
+                    output.accept(LotrBlocks.MUD_GRASS);
+                    output.accept(LotrBlocks.WHITE_SAND);
                 })
                 .build();
 

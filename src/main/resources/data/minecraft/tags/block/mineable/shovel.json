@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "lotr_craft:mordor_dirt",
+    "lotr_craft:mordor_gravel",
+    "lotr_craft:mud",
+    "lotr_craft:mud_grass",
+    "lotr_craft:white_sand"
+  ]
+}
