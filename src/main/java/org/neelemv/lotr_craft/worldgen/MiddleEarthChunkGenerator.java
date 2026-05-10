@@ -125,7 +125,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         int surfaceY = getTerrainHeight(x, z, terrain);
         for (int i = 0; i < states.length; i++) {
             int y = minY + i;
-            states[i] = stateForY(y, minY, surfaceY, terrain);
+            states[i] = stateForY(x, z, y, minY, surfaceY, terrain);
         }
         return new NoiseColumn(minY, states);
     }
@@ -176,7 +176,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     private static void fillColumn(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {
         int bedrockTop = Math.min(minY + 4, maxY - 1);
         int top = Math.min(Math.max(surfaceY, MiddleEarthMapConstants.SEA_LEVEL), maxY - 1);
-        MiddleEarthTerrainProfile profile = terrain.surfaceProfile();
+        MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
         boolean water = terrain.water();
 
         for (int y = minY; y <= bedrockTop; y++) {
@@ -222,7 +222,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         boolean bridge = terrain.water() || surfaceY < MiddleEarthMapConstants.SEA_LEVEL;
         if (bridge) {
             int bridgeY = Math.min(Math.max(MiddleEarthMapConstants.SEA_LEVEL + 1, surfaceY + 2), maxY - 3);
-            BridgeBlocks bridgeBlocks = bridgeBlocks(terrain.surfaceProfile());
+            BridgeBlocks bridgeBlocks = bridgeBlocks(terrain.surfaceProfileAtBlock(blockX, blockZ));
             boolean edge = isRoadEdge(blockX, blockZ);
             boolean pillar = edge && isRoadPillar(blockX, blockZ);
 
@@ -239,8 +239,9 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         }
 
         int roadY = Math.min(surfaceY, maxY - 1);
-        BlockState topState = roadState(terrain.surfaceProfile(), blockX, blockZ);
-        BlockState fillState = roadFillState(terrain.surfaceProfile(), blockX, blockZ);
+        MiddleEarthTerrainProfile roadProfile = terrain.surfaceProfileAtBlock(blockX, blockZ);
+        BlockState topState = roadState(roadProfile, blockX, blockZ);
+        BlockState fillState = roadFillState(roadProfile, blockX, blockZ);
         setBlockStateSafe(chunk, localX, roadY, localZ, topState, minY, maxY);
         for (int y = roadY - 1; y >= Math.max(minY + 5, roadY - 3); y--) {
             setBlockStateSafe(chunk, localX, y, localZ, fillState, minY, maxY);
@@ -338,8 +339,8 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     private record BridgeBlocks(BlockState deck, BlockState edge, BlockState fence) {
     }
 
-    private static BlockState stateForY(int y, int minY, int surfaceY, TerrainBlend terrain) {
-        MiddleEarthTerrainProfile profile = terrain.surfaceProfile();
+    private static BlockState stateForY(int blockX, int blockZ, int y, int minY, int surfaceY, TerrainBlend terrain) {
+        MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
         boolean water = terrain.water();
         if (y <= minY + 4) {
             return BEDROCK;

@@ -40,7 +40,9 @@ public class MiddleEarthBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(int quartX, int quartY, int quartZ, Climate.Sampler sampler) {
-        MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainAtBlock(quartX << 2, quartZ << 2);
+        int blockX = quartX << 2;
+        int blockZ = quartZ << 2;
+        MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainBlendAtBlock(blockX, blockZ).biomeProfileAtBlock(blockX, blockZ);
         return biomesByName.getOrDefault(profile.biomeName, fallbackBiome);
     }
 }

@@ -104,7 +104,8 @@ public final class SvgMiddleEarthMap {
                 water,
                 riverStrength,
                 mountainPeakHeight * inverseWeight,
-                mountainInterior * inverseWeight);
+                mountainInterior * inverseWeight,
+                TerrainBlend.normalizedWeights(profileWeights, totalWeight));
     }
 
     public int colorAtMapPixel(int x, int z) {
