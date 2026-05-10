@@ -5,6 +5,7 @@ import org.neelemv.lotr_craft.client.gui.FactionsScreen;
 import org.neelemv.lotr_craft.client.gui.MiddleEarthMapScreen;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
@@ -14,6 +15,14 @@ public class Lotr_craftClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LotrKeyMappings.register();
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (LotrKeyMappings.OPEN_MAP.consumeClick()) {
+                if (client.player != null && (client.player.isCreative() || client.player.isSpectator())) {
+                    client.setScreen(new MiddleEarthMapScreen());
+                }
+            }
+        });
 
         UseItemCallback.EVENT.register((player, level, hand) -> {
             if (!level.isClientSide()) {
