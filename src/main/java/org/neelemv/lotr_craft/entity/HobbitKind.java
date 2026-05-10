@@ -1,5 +1,7 @@
 package org.neelemv.lotr_craft.entity;
 
+import org.neelemv.lotr_craft.faction.LotrFaction;
+
 public enum HobbitKind {
     HOBBIT("hobbit", null),
     HOBBIT_BARTENDER("hobbit_bartender", "outfit_bartender"),
@@ -29,5 +31,12 @@ public enum HobbitKind {
 
     public String outfitTextureName() {
         return outfitTextureName;
+    }
+
+    public LotrFaction faction() {
+        return switch (this) {
+            case BREE_HOBBIT, BREE_HOBBIT_INNKEEPER, BREE_HOBBIT_BAKER, BREE_HOBBIT_BUTCHER, BREE_HOBBIT_BREWER, BREE_HOBBIT_FLORIST -> LotrFaction.BREE;
+            default -> LotrFaction.HOBBIT;
+        };
     }
 }
