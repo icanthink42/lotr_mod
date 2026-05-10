@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public final class SvgMiddleEarthMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvgMiddleEarthMap.class);
     private static final String MAP_RESOURCE = "/assets/lotr_craft/map/map.png";
+    private static final String HEIGHT_MAP_RESOURCE = "/assets/lotr_craft/map/height.png";
     private static final double TERRAIN_BLEND_RADIUS = 6.0;
     private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
     private static final double RIVER_SEARCH_RADIUS = 3.0;
@@ -25,10 +26,12 @@ public final class SvgMiddleEarthMap {
 
     private final byte[] terrainProfiles;
     private final short[] mountainDistances;
+    private final short[] heightMap;
 
-    private SvgMiddleEarthMap(byte[] terrainProfiles, short[] mountainDistances) {
+    private SvgMiddleEarthMap(byte[] terrainProfiles, short[] mountainDistances, short[] heightMap) {
         this.terrainProfiles = terrainProfiles;
         this.mountainDistances = mountainDistances;
+        this.heightMap = heightMap;
     }
 
     public static SvgMiddleEarthMap get() {
@@ -108,6 +111,39 @@ public final class SvgMiddleEarthMap {
                 TerrainBlend.normalizedWeights(profileWeights, totalWeight));
     }
 
+    double heightAtBlock(int blockX, int blockZ) {
+        double mapX = MiddleEarthMapConstants.blockToMapX(blockX);
+        double mapZ = MiddleEarthMapConstants.blockToMapZ(blockZ);
+        int centerX = fastFloor(mapX);
+        int centerZ = fastFloor(mapZ);
+        double totalWeight = 0.0;
+        double height = 0.0;
+
+        for (int dz = -TERRAIN_BLEND_CELL_RADIUS; dz <= TERRAIN_BLEND_CELL_RADIUS; dz++) {
+            int sampleZ = centerZ + dz;
+            double weightZ = blendWeight(mapZ, sampleZ);
+            if (weightZ <= 0.0) {
+                continue;
+            }
+            for (int dx = -TERRAIN_BLEND_CELL_RADIUS; dx <= TERRAIN_BLEND_CELL_RADIUS; dx++) {
+                int sampleX = centerX + dx;
+                double weight = weightZ * blendWeight(mapX, sampleX);
+                if (weight <= 0.0) {
+                    continue;
+                }
+
+                totalWeight += weight;
+                height += heightAtMapPixel(sampleX, sampleZ) * weight;
+            }
+        }
+
+        if (totalWeight <= 0.0) {
+            return MiddleEarthMapConstants.SEA_LEVEL;
+        }
+
+        return height / totalWeight;
+    }
+
     public int colorAtMapPixel(int x, int z) {
         return MiddleEarthTerrainProfile.colorForId(profileIdAtMapPixel(x, z));
     }
@@ -163,6 +199,14 @@ public final class SvgMiddleEarthMap {
         return terrainProfiles[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFF;
     }
 
+    private double heightAtMapPixel(int x, int z) {
+        if (x < 0 || x >= MiddleEarthMapConstants.MAP_WIDTH || z < 0 || z >= MiddleEarthMapConstants.MAP_HEIGHT) {
+            return MiddleEarthMapConstants.SEA_LEVEL;
+        }
+        double normalized = (heightMap[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFFFF) / 65535.0;
+        return MiddleEarthMapConstants.WORLD_MIN_Y + normalized * MiddleEarthMapConstants.WORLD_HEIGHT;
+    }
+
     private double mountainInteriorAtMapPixel(int x, int z) {
         if (x < 0 || x >= MiddleEarthMapConstants.MAP_WIDTH || z < 0 || z >= MiddleEarthMapConstants.MAP_HEIGHT) {
             return 0.0;
@@ -205,8 +249,9 @@ public final class SvgMiddleEarthMap {
                 LOGGER.warn("Found {} unknown colors in Middle-earth biome map; unknown pixels use ocean", unknownColors.size());
             }
             short[] mountainDistances = buildMountainDistances(profiles);
+            short[] heightMap = loadHeightMap();
             LOGGER.info("Loaded Middle-earth biome PNG: {} profile samples, {} biome definitions", profiles.length, MiddleEarthTerrainProfile.count());
-            return new SvgMiddleEarthMap(profiles, mountainDistances);
+            return new SvgMiddleEarthMap(profiles, mountainDistances, heightMap);
         } catch (Exception exception) {
             LOGGER.error("Failed to load Middle-earth biome PNG", exception);
             return empty();
@@ -216,7 +261,60 @@ public final class SvgMiddleEarthMap {
     private static SvgMiddleEarthMap empty() {
         byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
         Arrays.fill(profiles, (byte) MiddleEarthTerrainProfile.OCEAN.id());
-        return new SvgMiddleEarthMap(profiles, new short[profiles.length]);
+        short[] defaultHeight = new short[profiles.length];
+        short seaLevelEncoded = (short) ((long) (MiddleEarthMapConstants.SEA_LEVEL - MiddleEarthMapConstants.WORLD_MIN_Y) * 65535 / MiddleEarthMapConstants.WORLD_HEIGHT);
+        Arrays.fill(defaultHeight, seaLevelEncoded);
+        return new SvgMiddleEarthMap(profiles, new short[profiles.length], defaultHeight);
+    }
+
+    private static short[] loadHeightMap() {
+        try (InputStream stream = SvgMiddleEarthMap.class.getResourceAsStream(HEIGHT_MAP_RESOURCE)) {
+            if (stream == null) {
+                LOGGER.warn("Missing {}, using flat sea-level height map", HEIGHT_MAP_RESOURCE);
+                return defaultHeightMap();
+            }
+
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                LOGGER.warn("Failed to decode {}, using flat sea-level height map", HEIGHT_MAP_RESOURCE);
+                return defaultHeightMap();
+            }
+            if (image.getWidth() != MiddleEarthMapConstants.MAP_WIDTH || image.getHeight() != MiddleEarthMapConstants.MAP_HEIGHT) {
+                LOGGER.warn("Ignoring height map with unexpected size {}x{} (expected {}x{})", image.getWidth(), image.getHeight(), MiddleEarthMapConstants.MAP_WIDTH, MiddleEarthMapConstants.MAP_HEIGHT);
+                return defaultHeightMap();
+            }
+
+            int pixelCount = MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT;
+            short[] heights = new short[pixelCount];
+            boolean is16Bit = image.getColorModel().getComponentSize(0) > 8;
+            int offset = 0;
+            for (int z = 0; z < MiddleEarthMapConstants.MAP_HEIGHT; z++) {
+                for (int x = 0; x < MiddleEarthMapConstants.MAP_WIDTH; x++) {
+                    if (is16Bit) {
+                        int sample = image.getRaster().getSample(x, z, 0);
+                        heights[offset++] = (short) Math.min(sample, 65535);
+                    } else {
+                        int argb = image.getRGB(x, z);
+                        int gray = (argb >> 16) & 0xFF;
+                        heights[offset++] = (short) (gray * 257);
+                    }
+                }
+            }
+
+            LOGGER.info("Loaded Middle-earth height map PNG ({})", is16Bit ? "16-bit" : "8-bit");
+            return heights;
+        } catch (Exception exception) {
+            LOGGER.error("Failed to load Middle-earth height map PNG", exception);
+            return defaultHeightMap();
+        }
+    }
+
+    private static short[] defaultHeightMap() {
+        int pixelCount = MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT;
+        short[] heights = new short[pixelCount];
+        short seaLevelEncoded = (short) ((long) (MiddleEarthMapConstants.SEA_LEVEL - MiddleEarthMapConstants.WORLD_MIN_Y) * 65535 / MiddleEarthMapConstants.WORLD_HEIGHT);
+        Arrays.fill(heights, seaLevelEncoded);
+        return heights;
     }
 
     private static short[] buildMountainDistances(byte[] profiles) {
