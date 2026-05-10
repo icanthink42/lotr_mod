@@ -1,9 +1,11 @@
 package org.neelemv.lotr_craft;
 
 import org.neelemv.lotr_craft.block.LotrBlocks;
+import org.neelemv.lotr_craft.item.FactionBookItem;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
 import org.neelemv.lotr_craft.item.TheOneRingItem;
+import org.neelemv.lotr_craft.faction.LotrFaction;
 import org.neelemv.lotr_craft.network.LotrNetworking;
 import org.neelemv.lotr_craft.worldgen.LotrWorldgen;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ public class Lotr_craft implements ModInitializer {
     public static final Item GOLD_RING = registerItem("gold_ring", RingItem::new, new Item.Properties().stacksTo(1));
     public static final Item THE_ONE_RING = registerItem("the_one_ring", TheOneRingItem::new, new Item.Properties().stacksTo(1));
     public static final Item MIDDLE_EARTH_MAP = registerItem("middle_earth_map", MiddleEarthMapItem::new, new Item.Properties().stacksTo(1));
+    public static final Item FACTION_BOOK = registerItem("faction_book", FactionBookItem::new, new Item.Properties().stacksTo(1));
     public static final CreativeModeTab LOTR_CRAFT_TAB = registerCreativeTab();
 
     @Override
@@ -35,6 +38,7 @@ public class Lotr_craft implements ModInitializer {
         LotrBlocks.register();
         LotrNetworking.register();
         LotrWorldgen.register();
+        LOGGER.info("Loaded {} LOTR factions", LotrFaction.values().length);
     }
 
     private static Item registerItem(String name, ItemFactory itemFactory, Item.Properties properties) {
@@ -54,6 +58,7 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(GOLD_RING);
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
+                    output.accept(FACTION_BOOK);
                     output.accept(LotrBlocks.MORDOR_ROCK);
                     output.accept(LotrBlocks.GONDOR_ROCK);
                     output.accept(LotrBlocks.ROHAN_ROCK);

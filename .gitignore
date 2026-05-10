@@ -6,6 +6,7 @@
 .gradle-home/
 .gradle-build/
 build/
+bin/
 
 # Common IDE files
 .idea/
