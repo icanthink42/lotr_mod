@@ -24,6 +24,8 @@
     [
       "minecraft:patch_grass_plain",
       "minecraft:flower_plain",
+      "minecraft:patch_sugar_cane_swamp",
+      "minecraft:patch_waterlily",
       "minecraft:trees_plains"
     ],
     []

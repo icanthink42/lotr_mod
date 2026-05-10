@@ -24,9 +24,6 @@
     [
       "minecraft:patch_grass_plain",
       "minecraft:flower_plain",
-      "lotr_craft:bluebell_patch",
-      "lotr_craft:clover_patch",
-      "lotr_craft:flowering_grass_patch",
       "minecraft:trees_plains",
       "lotr_craft:chestnut_trees_sparse",
       "lotr_craft:aspen_trees_sparse"

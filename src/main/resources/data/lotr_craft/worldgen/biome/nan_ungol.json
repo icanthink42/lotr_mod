@@ -26,6 +26,7 @@
     [
       "minecraft:patch_dead_bush",
       "minecraft:patch_grass_plain",
+      "lotr_craft:thistle_patch",
       "lotr_craft:charred_trees_sparse"
     ],
     []

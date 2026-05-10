@@ -24,6 +24,9 @@
     [
       "minecraft:patch_grass_plain",
       "minecraft:patch_tall_grass_2",
+      "lotr_craft:nettle_patch",
+      "lotr_craft:fern_sprout_patch",
+      "lotr_craft:cranberry_bush_patch",
       "minecraft:patch_sugar_cane_swamp",
       "minecraft:patch_waterlily",
       "minecraft:brown_mushroom_swamp",

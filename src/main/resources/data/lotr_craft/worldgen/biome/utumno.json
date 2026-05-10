@@ -24,6 +24,7 @@
     [
       "minecraft:patch_grass_plain",
       "minecraft:flower_plain",
+      "lotr_craft:thistle_patch",
       "minecraft:trees_plains"
     ],
     []
