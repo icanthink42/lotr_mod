@@ -34,7 +34,7 @@ public final class LotrEquipment {
     public static List<Item> registerItems() {
         List<Item> items = new ArrayList<>();
         for (Weapon weapon : Weapon.values()) {
-            Item item = Lotr_craft.registerItem(weapon.id(), weapon.bow ? BowItem::new : Item::new, weapon.properties());
+            Item item = Lotr_craft.registerItem(weapon.id(), weapon.isBow() ? BowItem::new : Item::new, weapon.properties());
             WEAPONS.put(weapon, item);
             items.add(item);
         }
@@ -189,53 +189,57 @@ public final class LotrEquipment {
     }
 
     public enum Weapon {
-        SWORD_IRON("swordBronze", false, 3.0F),
-        DAGGER_IRON("daggerIron", false, 1.5F),
-        BATTLEAXE_IRON("battleaxeIron", false, 5.0F),
-        IRON_BOW("bronzeCrossbow", true, 0.0F),
-        SWORD_GONDOR("swordGondor", false, 3.5F),
-        SWORD_ROHAN("swordRohan", false, 3.5F),
-        SWORD_DALE("swordDale", false, 3.5F),
-        SWORD_DWARVEN("swordDwarven", false, 4.0F),
-        SWORD_BLUE_DWARVEN("swordBlueDwarven", false, 4.0F),
-        SWORD_HIGH_ELVEN("swordHighElven", false, 4.0F),
-        SWORD_ELVEN("swordElven", false, 4.0F),
-        SWORD_WOOD_ELVEN("swordWoodElven", false, 4.0F),
-        SWORD_ORC("scimitarOrc", false, 3.0F),
-        SWORD_URUK("scimitarUruk", false, 4.0F),
-        SWORD_GUNDABAD_URUK("swordGundabadUruk", false, 4.0F),
-        SWORD_RHUN("swordRhun", false, 3.5F),
-        SWORD_NEAR_HARAD("scimitarNearHarad", false, 3.5F),
-        SWORD_MOREDAN("swordMoredain", false, 3.5F),
-        SWORD_TAUREDAIN("swordTauredain", false, 3.5F),
-        SWORD_UTUMNO("swordUtumno", false, 5.0F),
-        BATTLEAXE_ROHAN("battleaxeRohan", false, 5.0F),
-        BATTLEAXE_DWARVEN("battleaxeDwarven", false, 5.5F),
-        BATTLEAXE_BLUE_DWARVEN("battleaxeBlueDwarven", false, 5.5F),
-        BATTLEAXE_DUNLENDING("battleaxeBronze", false, 5.0F),
-        BATTLEAXE_HALF_TROLL("battleaxeHalfTroll", false, 6.5F),
-        DAGGER_ORC("daggerOrc", false, 2.0F),
-        RANGER_BOW("rangerBow", true, 0.0F),
-        GONDOR_BOW("gondorBow", true, 0.0F),
-        ROHAN_BOW("rohanBow", true, 0.0F),
-        DALE_BOW("daleBow", true, 0.0F),
-        ELVEN_BOW("elvenBow", true, 0.0F),
-        WOOD_ELVEN_BOW("mirkwoodBow", true, 0.0F),
-        DWARVEN_CROSSBOW("ironCrossbow", true, 0.0F),
-        ORC_BOW("orcBow", true, 0.0F),
-        URUK_BOW("urukCrossbow", true, 0.0F),
-        RHUN_BOW("rhunBow", true, 0.0F),
-        HARAD_BOW("nearHaradBow", true, 0.0F),
-        TAUREDAIN_BLOWGUN("tauredainBlowgun", true, 0.0F);
+        SWORD_IRON("swordBronze", WeaponClass.SWORD, ToolMaterial.COPPER, 2.5F, -2.4F),
+        DAGGER_IRON("daggerIron", WeaponClass.DAGGER, ToolMaterial.IRON, 0.5F, -1.6F),
+        BATTLEAXE_IRON("battleaxeIron", WeaponClass.BATTLEAXE, ToolMaterial.IRON, 5.0F, -3.2F),
+        IRON_BOW("bronzeCrossbow", WeaponClass.BOW, ToolMaterial.COPPER, 0.0F, 0.0F),
+        SWORD_GONDOR("swordGondor", WeaponClass.SWORD, ToolMaterial.IRON, 3.0F, -2.4F),
+        SWORD_ROHAN("swordRohan", WeaponClass.SWORD, ToolMaterial.IRON, 2.8F, -2.35F),
+        SWORD_DALE("swordDale", WeaponClass.SWORD, ToolMaterial.IRON, 3.0F, -2.4F),
+        SWORD_DWARVEN("swordDwarven", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.8F, -2.55F),
+        SWORD_BLUE_DWARVEN("swordBlueDwarven", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.8F, -2.55F),
+        SWORD_HIGH_ELVEN("swordHighElven", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.4F, -2.25F),
+        SWORD_ELVEN("swordElven", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.3F, -2.2F),
+        SWORD_WOOD_ELVEN("swordWoodElven", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.2F, -2.15F),
+        SWORD_ORC("scimitarOrc", WeaponClass.SWORD, ToolMaterial.COPPER, 2.5F, -2.35F),
+        SWORD_URUK("scimitarUruk", WeaponClass.SWORD, ToolMaterial.IRON, 3.2F, -2.55F),
+        SWORD_GUNDABAD_URUK("swordGundabadUruk", WeaponClass.SWORD, ToolMaterial.IRON, 3.4F, -2.6F),
+        SWORD_RHUN("swordRhun", WeaponClass.SWORD, ToolMaterial.IRON, 3.0F, -2.4F),
+        SWORD_NEAR_HARAD("scimitarNearHarad", WeaponClass.SWORD, ToolMaterial.IRON, 2.8F, -2.25F),
+        SWORD_MOREDAN("swordMoredain", WeaponClass.SWORD, ToolMaterial.STONE, 3.0F, -2.5F),
+        SWORD_TAUREDAIN("swordTauredain", WeaponClass.SWORD, ToolMaterial.DIAMOND, 2.6F, -2.45F),
+        SWORD_UTUMNO("swordUtumno", WeaponClass.SWORD, ToolMaterial.NETHERITE, 3.6F, -2.65F),
+        BATTLEAXE_ROHAN("battleaxeRohan", WeaponClass.BATTLEAXE, ToolMaterial.IRON, 5.2F, -3.25F),
+        BATTLEAXE_DWARVEN("battleaxeDwarven", WeaponClass.BATTLEAXE, ToolMaterial.DIAMOND, 5.0F, -3.35F),
+        BATTLEAXE_BLUE_DWARVEN("battleaxeBlueDwarven", WeaponClass.BATTLEAXE, ToolMaterial.DIAMOND, 5.0F, -3.35F),
+        BATTLEAXE_DUNLENDING("battleaxeBronze", WeaponClass.BATTLEAXE, ToolMaterial.COPPER, 5.0F, -3.15F),
+        BATTLEAXE_HALF_TROLL("battleaxeHalfTroll", WeaponClass.BATTLEAXE, ToolMaterial.STONE, 7.0F, -3.65F),
+        DAGGER_ORC("daggerOrc", WeaponClass.DAGGER, ToolMaterial.COPPER, 0.7F, -1.55F),
+        RANGER_BOW("rangerBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        GONDOR_BOW("gondorBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        ROHAN_BOW("rohanBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        DALE_BOW("daleBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        ELVEN_BOW("elvenBow", WeaponClass.BOW, ToolMaterial.DIAMOND, 0.0F, 0.0F),
+        WOOD_ELVEN_BOW("mirkwoodBow", WeaponClass.BOW, ToolMaterial.DIAMOND, 0.0F, 0.0F),
+        DWARVEN_CROSSBOW("ironCrossbow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        ORC_BOW("orcBow", WeaponClass.BOW, ToolMaterial.COPPER, 0.0F, 0.0F),
+        URUK_BOW("urukCrossbow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        RHUN_BOW("rhunBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        HARAD_BOW("nearHaradBow", WeaponClass.BOW, ToolMaterial.IRON, 0.0F, 0.0F),
+        TAUREDAIN_BLOWGUN("tauredainBlowgun", WeaponClass.BOW, ToolMaterial.STONE, 0.0F, 0.0F);
 
         private final String oldTexture;
-        private final boolean bow;
+        private final WeaponClass weaponClass;
+        private final ToolMaterial material;
         private final float damage;
+        private final float attackSpeed;
 
-        Weapon(String oldTexture, boolean bow, float damage) {
+        Weapon(String oldTexture, WeaponClass weaponClass, ToolMaterial material, float damage, float attackSpeed) {
             this.oldTexture = oldTexture;
-            this.bow = bow;
+            this.weaponClass = weaponClass;
+            this.material = material;
             this.damage = damage;
+            this.attackSpeed = attackSpeed;
         }
 
         public String id() {
@@ -246,10 +250,25 @@ public final class LotrEquipment {
             return oldTexture;
         }
 
+        private boolean isBow() {
+            return weaponClass == WeaponClass.BOW;
+        }
+
         private Item.Properties properties() {
             Item.Properties properties = new Item.Properties().stacksTo(1);
-            return bow ? properties.durability(384) : properties.sword(ToolMaterial.IRON, damage, -2.4F);
+            return switch (weaponClass) {
+                case BOW -> properties.durability(material.durability());
+                case DAGGER, SWORD -> properties.sword(material, damage, attackSpeed);
+                case BATTLEAXE -> properties.axe(material, damage, attackSpeed);
+            };
         }
+    }
+
+    private enum WeaponClass {
+        SWORD,
+        DAGGER,
+        BATTLEAXE,
+        BOW
     }
 
     public enum ArmorFamily {
