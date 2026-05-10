@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 0.5,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#8ba850",
+    "dry_foliage_color": "#94964c",
     "foliage_color": "#6b9344",
-    "dry_foliage_color": "#94964c"
+    "grass_color": "#8ba850",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
@@ -21,7 +21,12 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_dead_bush",
+      "minecraft:patch_dry_grass_desert",
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_cactus_desert"
+    ],
     []
   ],
   "has_precipitation": true,

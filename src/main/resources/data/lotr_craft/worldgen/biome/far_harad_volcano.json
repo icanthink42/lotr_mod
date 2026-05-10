@@ -23,7 +23,18 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_dead_bush",
+      "minecraft:patch_dry_grass_desert",
+      "minecraft:patch_grass_plain",
+      "lotr_craft:marigold_patch",
+      "lotr_craft:lavender_patch",
+      "lotr_craft:raspberry_bush_patch",
+      "lotr_craft:elderberry_bush_patch",
+      "minecraft:patch_cactus_desert",
+      "lotr_craft:baobab_trees_sparse",
+      "lotr_craft:mahogany_trees_sparse"
+    ],
     []
   ],
   "has_precipitation": false,

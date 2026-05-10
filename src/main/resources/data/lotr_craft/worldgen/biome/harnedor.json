@@ -21,7 +21,12 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_dead_bush",
+      "minecraft:patch_dry_grass_desert",
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_cactus_desert"
+    ],
     []
   ],
   "has_precipitation": true,

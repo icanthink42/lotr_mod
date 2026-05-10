@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "lotr_craft:block/date_palm_sapling"
+  }
+}

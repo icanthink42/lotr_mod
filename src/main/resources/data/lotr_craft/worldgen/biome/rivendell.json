@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 1.0,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#86b72a",
+    "dry_foliage_color": "#919f38",
     "foliage_color": "#689c2c",
-    "dry_foliage_color": "#919f38"
+    "grass_color": "#86b72a",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
@@ -21,7 +21,11 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:flower_plain",
+      "minecraft:trees_plains"
+    ],
     []
   ],
   "has_precipitation": true,

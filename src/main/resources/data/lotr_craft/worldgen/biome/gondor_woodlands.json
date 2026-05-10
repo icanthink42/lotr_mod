@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 0.9,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#59872b",
+    "dry_foliage_color": "#788438",
     "foliage_color": "#4a7d2c",
-    "dry_foliage_color": "#788438"
+    "grass_color": "#59872b",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
@@ -21,7 +21,18 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:flower_forest_flowers",
+      "lotr_craft:athelas_patch",
+      "lotr_craft:asphodel_patch",
+      "lotr_craft:marigold_patch",
+      "lotr_craft:lavender_patch",
+      "minecraft:trees_flower_forest",
+      "lotr_craft:maple_trees",
+      "lotr_craft:chestnut_trees",
+      "lotr_craft:beech_trees_dense"
+    ],
     []
   ],
   "has_precipitation": true,

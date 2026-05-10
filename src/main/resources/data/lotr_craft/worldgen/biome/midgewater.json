@@ -21,7 +21,11 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:flower_plain",
+      "minecraft:trees_plains"
+    ],
     []
   ],
   "has_precipitation": false,

@@ -21,7 +21,16 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:flower_plain",
+      "lotr_craft:marigold_patch",
+      "lotr_craft:thistle_patch",
+      "lotr_craft:cranberry_bush_patch",
+      "lotr_craft:beech_trees_sparse",
+      "lotr_craft:maple_trees_sparse",
+      "lotr_craft:pine_trees_sparse"
+    ],
     []
   ],
   "has_precipitation": true,

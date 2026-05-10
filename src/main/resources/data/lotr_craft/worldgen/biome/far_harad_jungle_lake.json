@@ -22,7 +22,14 @@
     [],
     [],
     [],
-    [],
+    [
+      "lotr_craft:marigold_patch",
+      "lotr_craft:lavender_patch",
+      "lotr_craft:raspberry_bush_patch",
+      "lotr_craft:elderberry_bush_patch",
+      "minecraft:patch_sugar_cane",
+      "minecraft:seagrass_normal"
+    ],
     []
   ],
   "has_precipitation": false,

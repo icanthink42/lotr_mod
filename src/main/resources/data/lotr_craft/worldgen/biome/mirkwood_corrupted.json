@@ -22,7 +22,16 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "lotr_craft:thistle_patch",
+      "lotr_craft:nettle_patch",
+      "lotr_craft:wildberry_bush_patch",
+      "minecraft:brown_mushroom_taiga",
+      "minecraft:red_mushroom_taiga",
+      "minecraft:trees_taiga",
+      "lotr_craft:mirk_oak_trees_dense"
+    ],
     []
   ],
   "has_precipitation": true,

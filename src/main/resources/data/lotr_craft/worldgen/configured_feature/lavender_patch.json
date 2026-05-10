@@ -1,0 +1,11 @@
+{
+  "config": {
+    "to_place": {
+      "state": {
+        "Name": "lotr_craft:lavender"
+      },
+      "type": "minecraft:simple_state_provider"
+    }
+  },
+  "type": "minecraft:simple_block"
+}

@@ -21,7 +21,16 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_tall_grass_2",
+      "minecraft:flower_plain",
+      "lotr_craft:elanor_patch",
+      "lotr_craft:niphredil_patch",
+      "lotr_craft:bluebell_patch",
+      "lotr_craft:clover_patch",
+      "lotr_craft:mallorn_trees_dense"
+    ],
     []
   ],
   "has_precipitation": true,

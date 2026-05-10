@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 0.9,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#8d9596",
+    "dry_foliage_color": "#958c73",
     "foliage_color": "#6c8672",
-    "dry_foliage_color": "#958c73"
+    "grass_color": "#8d9596",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
@@ -21,7 +21,16 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:flower_plain",
+      "lotr_craft:bluebell_patch",
+      "lotr_craft:clover_patch",
+      "lotr_craft:flowering_grass_patch",
+      "minecraft:trees_plains",
+      "lotr_craft:chestnut_trees_sparse",
+      "lotr_craft:aspen_trees_sparse"
+    ],
     []
   ],
   "has_precipitation": true,

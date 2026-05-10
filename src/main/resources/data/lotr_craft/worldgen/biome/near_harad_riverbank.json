@@ -21,7 +21,13 @@
     [],
     [],
     [],
-    [],
+    [
+      "lotr_craft:marigold_patch",
+      "lotr_craft:lavender_patch",
+      "minecraft:patch_sugar_cane",
+      "minecraft:patch_waterlily",
+      "minecraft:seagrass_normal"
+    ],
     []
   ],
   "has_precipitation": false,

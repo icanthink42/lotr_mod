@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 1.0,
   "effects": {
-    "water_color": "#518b98",
-    "grass_color": "#5f9c59",
+    "dry_foliage_color": "#7b9051",
     "foliage_color": "#4e8b4a",
-    "dry_foliage_color": "#7b9051"
+    "grass_color": "#5f9c59",
+    "water_color": "#518b98"
   },
   "features": [
     [],
@@ -21,7 +21,15 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_tall_grass_2",
+      "minecraft:patch_sugar_cane_swamp",
+      "minecraft:patch_waterlily",
+      "minecraft:brown_mushroom_swamp",
+      "minecraft:trees_swamp",
+      "lotr_craft:willow_trees_sparse"
+    ],
     []
   ],
   "has_precipitation": false,

@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 0.7,
   "effects": {
-    "water_color": "#3f76e4",
-    "grass_color": "#3a5223",
+    "dry_foliage_color": "#676734",
     "foliage_color": "#365b27",
-    "dry_foliage_color": "#676734"
+    "grass_color": "#3a5223",
+    "water_color": "#3f76e4"
   },
   "features": [
     [],
@@ -21,7 +21,16 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "lotr_craft:thistle_patch",
+      "lotr_craft:nettle_patch",
+      "lotr_craft:wildberry_bush_patch",
+      "minecraft:brown_mushroom_taiga",
+      "minecraft:red_mushroom_taiga",
+      "minecraft:trees_taiga",
+      "lotr_craft:mirk_oak_trees_dense"
+    ],
     []
   ],
   "has_precipitation": true,

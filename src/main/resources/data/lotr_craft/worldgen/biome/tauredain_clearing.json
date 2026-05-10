@@ -22,7 +22,14 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_grass_jungle",
+      "minecraft:bamboo_light",
+      "minecraft:trees_jungle",
+      "lotr_craft:banana_trees_sparse",
+      "lotr_craft:mahogany_trees_dense"
+    ],
     []
   ],
   "has_precipitation": true,

@@ -21,7 +21,10 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_sugar_cane",
+      "minecraft:seagrass_normal"
+    ],
     []
   ],
   "has_precipitation": false,

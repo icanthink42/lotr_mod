@@ -21,7 +21,13 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_grass_taiga",
+      "minecraft:trees_snowy",
+      "lotr_craft:fir_trees_sparse",
+      "lotr_craft:pine_trees_sparse"
+    ],
     []
   ],
   "has_precipitation": true,

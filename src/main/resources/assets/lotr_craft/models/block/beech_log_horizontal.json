@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "lotr_craft:block/beech_log_top",
+    "side": "lotr_craft:block/beech_log"
+  }
+}

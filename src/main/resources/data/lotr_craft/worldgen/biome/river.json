@@ -6,10 +6,10 @@
   "carvers": [],
   "downfall": 0.8,
   "effects": {
-    "water_color": "#3a79ca",
-    "grass_color": "#367cb5",
+    "dry_foliage_color": "#657e84",
     "foliage_color": "#347686",
-    "dry_foliage_color": "#657e84"
+    "grass_color": "#367cb5",
+    "water_color": "#3a79ca"
   },
   "features": [
     [],
@@ -21,7 +21,11 @@
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:patch_sugar_cane",
+      "minecraft:patch_waterlily",
+      "minecraft:seagrass_normal"
+    ],
     []
   ],
   "has_precipitation": false,

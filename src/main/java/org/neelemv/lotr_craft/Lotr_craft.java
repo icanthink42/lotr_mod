@@ -65,6 +65,12 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(LotrBlocks.MUD);
                     output.accept(LotrBlocks.MUD_GRASS);
                     output.accept(LotrBlocks.WHITE_SAND);
+                    for (net.minecraft.world.level.block.Block block : LotrBlocks.TREE_BLOCKS) {
+                        output.accept(block);
+                    }
+                    for (net.minecraft.world.level.block.Block block : LotrBlocks.FOLIAGE_BLOCKS) {
+                        output.accept(block);
+                    }
                 })
                 .build();
 
