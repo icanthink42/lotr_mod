@@ -191,12 +191,12 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         if (!water) {
             int fillerBottom = Math.max(bedrockTop + 1, surfaceY - 4);
             int fillerTop = Math.min(surfaceY - 1, maxY - 1);
-            BlockState filler = profile.filler();
+            BlockState filler = profile.filler(blockX, blockZ);
             for (int y = fillerBottom; y <= fillerTop; y++) {
                 setBlockState(chunk, localX, y, localZ, filler);
             }
             if (surfaceY >= minY && surfaceY < maxY) {
-                setBlockState(chunk, localX, surfaceY, localZ, profile.top());
+                setBlockState(chunk, localX, surfaceY, localZ, profile.top(blockX, blockZ, surfaceY, terrain.water()));
             }
         } else {
             int oceanFloorTop = Math.min(surfaceY, maxY - 1);
@@ -284,7 +284,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         String biome = profile.biomeName;
         int roll = coordinateHash(blockX, blockZ) & 7;
         if (biome.contains("mordor") || biome.contains("gorgoroth") || biome.contains("udun") || biome.contains("dagorlad") || biome.contains("nanUngol")) {
-            return roll == 0 ? GRAVEL : LotrBlocks.MORDOR_DIRT.defaultBlockState();
+            return roll == 0 ? LotrBlocks.MORDOR_GRAVEL.defaultBlockState() : LotrBlocks.MORDOR_DIRT.defaultBlockState();
         }
         if (biome.contains("gondor") || biome.contains("ithilien") || biome.contains("lebennin") || biome.contains("lossarnach") || biome.contains("dorEnErnil") || biome.contains("dale") || biome.contains("dorwinion") || biome.contains("rhun")) {
             return roll <= 1 ? GRAVEL : COBBLESTONE;

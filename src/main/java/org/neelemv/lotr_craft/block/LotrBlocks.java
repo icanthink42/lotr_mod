@@ -30,6 +30,7 @@ import net.minecraft.world.level.material.MapColor;
 public final class LotrBlocks {
     public static final List<Block> TREE_BLOCKS = new ArrayList<>();
     public static final List<Block> FOLIAGE_BLOCKS = new ArrayList<>();
+    public static final List<Block> SURFACE_BLOCKS = new ArrayList<>();
 
     public static final Block MORDOR_ROCK = registerBlock("mordor_rock", rock(MapColor.COLOR_BLACK));
     public static final Block GONDOR_ROCK = registerBlock("gondor_rock", rock(MapColor.STONE));
@@ -45,6 +46,10 @@ public final class LotrBlocks {
             .mapColor(MapColor.COLOR_BLACK)
             .strength(0.6F)
             .sound(SoundType.GRAVEL));
+    public static final Block QUAGMIRE = registerSurfaceBlock("quagmire", BlockBehaviour.Properties.ofFullCopy(Blocks.MUD)
+            .mapColor(MapColor.COLOR_BROWN)
+            .strength(0.8F)
+            .sound(SoundType.MUD));
     public static final Block MUD = registerBlock("mud", BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT)
             .mapColor(MapColor.COLOR_BROWN)
             .strength(0.5F)
@@ -57,6 +62,22 @@ public final class LotrBlocks {
             .mapColor(MapColor.SNOW)
             .strength(0.5F)
             .sound(SoundType.SAND));
+    public static final Block RED_CLAY = registerSurfaceBlock("red_clay", BlockBehaviour.Properties.ofFullCopy(Blocks.TERRACOTTA)
+            .mapColor(MapColor.COLOR_RED)
+            .strength(1.25F)
+            .sound(SoundType.GRAVEL));
+    public static final Block RED_SANDSTONE = registerSurfaceBlock("red_sandstone", BlockBehaviour.Properties.ofFullCopy(Blocks.RED_SANDSTONE)
+            .mapColor(MapColor.COLOR_ORANGE)
+            .strength(0.8F)
+            .sound(SoundType.STONE));
+    public static final Block WHITE_SANDSTONE = registerSurfaceBlock("white_sandstone", BlockBehaviour.Properties.ofFullCopy(Blocks.SANDSTONE)
+            .mapColor(MapColor.SNOW)
+            .strength(0.8F)
+            .sound(SoundType.STONE));
+    public static final Block DRIED_REEDS = registerSurfaceBlock("dried_reeds", BlockBehaviour.Properties.ofFullCopy(Blocks.HAY_BLOCK)
+            .mapColor(MapColor.COLOR_BROWN)
+            .strength(0.5F)
+            .sound(SoundType.GRASS));
 
     static {
         registerTreeFamily("mallorn", MapColor.GOLD, MapColor.COLOR_YELLOW);
@@ -165,12 +186,18 @@ public final class LotrBlocks {
     }
 
     private static void registerGroundPlant(String name, MapColor mapColor) {
-        FOLIAGE_BLOCKS.add(registerBlock(name, properties -> new LotrGroundPlantBlock(properties), BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)
+        registerGroundPlantBlock(name, mapColor);
+    }
+
+    private static Block registerGroundPlantBlock(String name, MapColor mapColor) {
+        Block block = registerBlock(name, properties -> new LotrGroundPlantBlock(properties), BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)
                 .mapColor(mapColor)
                 .noOcclusion()
                 .replaceable()
                 .strength(0.0F)
-                .sound(SoundType.GRASS)));
+                .sound(SoundType.GRASS));
+        FOLIAGE_BLOCKS.add(block);
+        return block;
     }
 
     private static ResourceKey<ConfiguredFeature<?, ?>> configuredFeatureKey(String name) {
@@ -179,6 +206,12 @@ public final class LotrBlocks {
 
     private static Block registerBlock(String name, BlockBehaviour.Properties properties) {
         return registerBlock(name, Block::new, properties);
+    }
+
+    private static Block registerSurfaceBlock(String name, BlockBehaviour.Properties properties) {
+        Block block = registerBlock(name, properties);
+        SURFACE_BLOCKS.add(block);
+        return block;
     }
 
     private static Block registerBlock(String name, BlockFactory blockFactory, BlockBehaviour.Properties properties) {

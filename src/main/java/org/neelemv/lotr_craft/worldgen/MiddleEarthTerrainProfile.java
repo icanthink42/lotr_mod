@@ -214,6 +214,14 @@ enum MiddleEarthTerrainProfile {
         return surface.filler();
     }
 
+    BlockState top(int blockX, int blockZ, int surfaceY, boolean wet) {
+        return surface.top(blockX, blockZ, surfaceY, wet);
+    }
+
+    BlockState filler(int blockX, int blockZ) {
+        return surface.filler(blockX, blockZ);
+    }
+
     int id() {
         return ordinal();
     }
@@ -297,7 +305,7 @@ enum MiddleEarthTerrainProfile {
         BlockState top() {
             return switch (this) {
                 case GRASS -> Blocks.GRASS_BLOCK.defaultBlockState();
-                case PODZOL -> Blocks.PODZOL.defaultBlockState();
+                case PODZOL -> Blocks.GRASS_BLOCK.defaultBlockState();
                 case SAND -> Blocks.SAND.defaultBlockState();
                 case RED_SAND -> Blocks.RED_SAND.defaultBlockState();
                 case GRAVEL -> Blocks.GRAVEL.defaultBlockState();
@@ -307,7 +315,7 @@ enum MiddleEarthTerrainProfile {
                 case COARSE_DIRT -> Blocks.COARSE_DIRT.defaultBlockState();
                 case MORDOR_ROCK -> LotrBlocks.MORDOR_ROCK.defaultBlockState();
                 case GONDOR_GRASS, ROHAN_GRASS, CHALK_GRASS -> Blocks.GRASS_BLOCK.defaultBlockState();
-                case GONDOR_PODZOL, ROHAN_PODZOL -> Blocks.PODZOL.defaultBlockState();
+                case GONDOR_PODZOL, ROHAN_PODZOL -> Blocks.GRASS_BLOCK.defaultBlockState();
                 case MORDOR_DIRT -> LotrBlocks.MORDOR_DIRT.defaultBlockState();
                 case MUD_GRASS -> LotrBlocks.MUD_GRASS.defaultBlockState();
                 case WHITE_SAND -> LotrBlocks.WHITE_SAND.defaultBlockState();
@@ -329,6 +337,201 @@ enum MiddleEarthTerrainProfile {
                 case MUD_GRASS -> LotrBlocks.MUD.defaultBlockState();
                 case WHITE_SAND -> LotrBlocks.WHITE_SAND.defaultBlockState();
             };
+        }
+
+        BlockState top(int blockX, int blockZ, int surfaceY, boolean wet) {
+            return switch (this) {
+                case GRASS -> {
+                    if (wet && inPatch(blockX, blockZ, 0x77A9D61BL, 4, 3, 6)) {
+                        yield LotrBlocks.QUAGMIRE.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x39C21F05L, 18, 2, 4)) {
+                        yield Blocks.COARSE_DIRT.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case PODZOL, GONDOR_PODZOL, ROHAN_PODZOL -> {
+                    if (inPatch(blockX, blockZ, 0x11D2EA7BL, 18, 2, 3)) {
+                        yield Blocks.COARSE_DIRT.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case SAND -> {
+                    if (inPatch(blockX, blockZ, 0x2860C991L, 18, 2, 4)) {
+                        yield Blocks.COARSE_DIRT.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x5B1355A7L, 10, 3, 5)) {
+                        yield Blocks.SANDSTONE.defaultBlockState();
+                    }
+                    yield Blocks.SAND.defaultBlockState();
+                }
+                case RED_SAND -> inPatch(blockX, blockZ, 0x53F7B39DL, 9, 3, 5) ? LotrBlocks.RED_SANDSTONE.defaultBlockState() : Blocks.RED_SAND.defaultBlockState();
+                case GRAVEL -> inPatch(blockX, blockZ, 0x712E887DL, 12, 2, 4) ? Blocks.STONE.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
+                case STONE -> inPatch(blockX, blockZ, 0x2C93D4E3L, 14, 2, 4) ? Blocks.GRAVEL.defaultBlockState() : Blocks.STONE.defaultBlockState();
+                case SNOW_STONE -> {
+                    if (surfaceY < 78 && inPatch(blockX, blockZ, 0x62AC782DL, 9, 2, 5)) {
+                        yield Blocks.STONE.defaultBlockState();
+                    }
+                    yield Blocks.SNOW_BLOCK.defaultBlockState();
+                }
+                case SNOW_GRASS -> {
+                    if (inPatch(blockX, blockZ, 0x67BD202FL, 11, 2, 4)) {
+                        yield Blocks.SNOW_BLOCK.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case COARSE_DIRT -> inPatch(blockX, blockZ, 0x394FD109L, 7, 2, 5) ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.COARSE_DIRT.defaultBlockState();
+                case MORDOR_ROCK -> mordorRock(blockX, blockZ);
+                case MORDOR_DIRT -> mordorDirt(blockX, blockZ);
+                case GONDOR_GRASS -> {
+                    if (inPatch(blockX, blockZ, 0x0DD81BC5L, 20, 2, 3)) {
+                        yield LotrBlocks.GONDOR_ROCK.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x604315F7L, 22, 2, 3)) {
+                        yield Blocks.COARSE_DIRT.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case ROHAN_GRASS -> {
+                    if (inPatch(blockX, blockZ, 0x6B830A3BL, 18, 2, 3)) {
+                        yield Blocks.COARSE_DIRT.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x76DE249DL, 24, 2, 3)) {
+                        yield LotrBlocks.DRIED_REEDS.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case CHALK_GRASS -> {
+                    if (inPatch(blockX, blockZ, 0x7DCA90F1L, 10, 2, 4)) {
+                        yield LotrBlocks.CHALK_ROCK.defaultBlockState();
+                    }
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                case MUD_GRASS -> {
+                    if (wet && inPatch(blockX, blockZ, 0x475D2D7DL, 3, 3, 6)) {
+                        yield LotrBlocks.MUD.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x64AB56EDL, 8, 2, 4)) {
+                        yield LotrBlocks.MUD.defaultBlockState();
+                    }
+                    if (inPatch(blockX, blockZ, 0x580B46E7L, 10, 2, 4)) {
+                        yield LotrBlocks.QUAGMIRE.defaultBlockState();
+                    }
+                    yield LotrBlocks.MUD_GRASS.defaultBlockState();
+                }
+                case WHITE_SAND -> inPatch(blockX, blockZ, 0x4B73490BL, 9, 3, 5) ? LotrBlocks.WHITE_SANDSTONE.defaultBlockState() : LotrBlocks.WHITE_SAND.defaultBlockState();
+            };
+        }
+
+        BlockState filler(int blockX, int blockZ) {
+            return switch (this) {
+                case SAND -> inPatch(blockX, blockZ, 0x5B1355A7L, 10, 3, 5) ? Blocks.SANDSTONE.defaultBlockState() : Blocks.SAND.defaultBlockState();
+                case RED_SAND -> inPatch(blockX, blockZ, 0x53F7B39DL, 9, 3, 5) ? LotrBlocks.RED_SANDSTONE.defaultBlockState() : Blocks.RED_SAND.defaultBlockState();
+                case WHITE_SAND -> inPatch(blockX, blockZ, 0x4B73490BL, 9, 3, 5) ? LotrBlocks.WHITE_SANDSTONE.defaultBlockState() : LotrBlocks.WHITE_SAND.defaultBlockState();
+                case MUD_GRASS -> LotrBlocks.MUD.defaultBlockState();
+                case MORDOR_ROCK -> mordorRock(blockX, blockZ);
+                case MORDOR_DIRT -> mordorDirt(blockX, blockZ);
+                case COARSE_DIRT -> Blocks.DIRT.defaultBlockState();
+                default -> filler();
+            };
+        }
+
+        private static BlockState mordorRock(int blockX, int blockZ) {
+            double gravel = layeredNoise(blockX, blockZ, 0.08, 0.45, 0x2D2C519BL);
+            if (gravel > 0.74 || (gravel > 0.58 && blockFleck(blockX, blockZ, 0x7E294F03L, 3))) {
+                return LotrBlocks.MORDOR_GRAVEL.defaultBlockState();
+            }
+
+            double dirt = layeredNoise(blockX, blockZ, 0.08, 0.42, 0x58F70719L);
+            if (dirt > 0.43 || (dirt > 0.25 && blockFleck(blockX, blockZ, 0x6D3F3B1DL, 4))) {
+                return LotrBlocks.MORDOR_DIRT.defaultBlockState();
+            }
+
+            return LotrBlocks.MORDOR_ROCK.defaultBlockState();
+        }
+
+        private static BlockState mordorDirt(int blockX, int blockZ) {
+            double gravel = layeredNoise(blockX, blockZ, 0.09, 0.60, 0x4DE60F2DL);
+            if (gravel > 0.55 || (gravel > 0.35 && blockFleck(blockX, blockZ, 0x10283BBFL, 4))) {
+                return LotrBlocks.MORDOR_GRAVEL.defaultBlockState();
+            }
+
+            double rock = layeredNoise(blockX, blockZ, 0.07, 0.36, 0x78995E0BL);
+            if (rock > 0.68) {
+                return LotrBlocks.MORDOR_ROCK.defaultBlockState();
+            }
+
+            if (layeredNoise(blockX, blockZ, 0.10, 0.48, 0x54A4CE19L) > 0.95) {
+                return LotrBlocks.MORDOR_DIRT.defaultBlockState();
+            }
+            return LotrBlocks.MORDOR_DIRT.defaultBlockState();
+        }
+
+        private static boolean inPatch(int blockX, int blockZ, long salt, int chance, int minRadius, int maxRadius) {
+            int chunkX = Math.floorDiv(blockX, 16);
+            int chunkZ = Math.floorDiv(blockZ, 16);
+            for (int offsetX = -1; offsetX <= 1; offsetX++) {
+                for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                    int patchChunkX = chunkX + offsetX;
+                    int patchChunkZ = chunkZ + offsetZ;
+                    long seed = mix(patchChunkX, patchChunkZ, salt);
+                    if (positive(seed, chance) != 0) {
+                        continue;
+                    }
+                    int centerX = patchChunkX * 16 + 8 + positive(seed >>> 8, 16);
+                    int centerZ = patchChunkZ * 16 + 8 + positive(seed >>> 16, 16);
+                    int radius = minRadius + positive(seed >>> 24, maxRadius - minRadius + 1);
+                    int dx = blockX - centerX;
+                    int dz = blockZ - centerZ;
+                    int edgeJitter = positive(mix(blockX, blockZ, seed), 3) - 1;
+                    int effectiveRadius = Math.max(1, radius + edgeJitter);
+                    if (dx * dx + dz * dz <= effectiveRadius * effectiveRadius) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static double layeredNoise(int x, int z, double broadScale, double fineScale, long salt) {
+            return surfaceNoise(x, z, broadScale, salt) + surfaceNoise(x, z, fineScale, salt + 0x632BE59BD9B4E019L);
+        }
+
+        private static double surfaceNoise(int x, int z, double scale, long salt) {
+            int xi = (int) Math.floor(x * scale);
+            int zi = (int) Math.floor(z * scale);
+            double xf = x * scale - xi;
+            double zf = z * scale - zi;
+            double a = randomUnit(xi, zi, salt);
+            double b = randomUnit(xi + 1, zi, salt);
+            double c = randomUnit(xi, zi + 1, salt);
+            double d = randomUnit(xi + 1, zi + 1, salt);
+            double u = xf * xf * (3.0 - 2.0 * xf);
+            double v = zf * zf * (3.0 - 2.0 * zf);
+            return lerp(lerp(a, b, u), lerp(c, d, u), v);
+        }
+
+        private static boolean blockFleck(int x, int z, long salt, int chance) {
+            return positive(mix(x, z, salt), chance) == 0;
+        }
+
+        private static double randomUnit(int x, int z, long salt) {
+            return ((mix(x, z, salt) >>> 11) * 0x1.0p-53) * 2.0 - 1.0;
+        }
+
+        private static double lerp(double a, double b, double delta) {
+            return a + (b - a) * delta;
+        }
+
+        private static long mix(long x, long z, long salt) {
+            long value = x * 341873128712L + z * 132897987541L + salt;
+            value = (value ^ (value >>> 30)) * 0xbf58476d1ce4e5b9L;
+            value = (value ^ (value >>> 27)) * 0x94d049bb133111ebL;
+            return value ^ (value >>> 31);
+        }
+
+        private static int positive(long value, int bound) {
+            return Math.floorMod((int) value, bound);
         }
     }
 }
