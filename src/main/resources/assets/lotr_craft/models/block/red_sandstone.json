@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "lotr_craft:block/red_sandstone_bottom",
+    "side": "lotr_craft:block/red_sandstone",
+    "top": "lotr_craft:block/red_sandstone_top"
+  }
+}

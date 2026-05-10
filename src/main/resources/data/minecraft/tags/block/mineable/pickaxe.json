@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "lotr_craft:mordor_rock",
+    "lotr_craft:gondor_rock",
+    "lotr_craft:rohan_rock",
+    "lotr_craft:blue_rock",
+    "lotr_craft:red_rock",
+    "lotr_craft:chalk_rock"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "attributes": {
+    "minecraft:visual/cloud_color": "#cc333333",
+    "minecraft:visual/fog_color": "#666666",
+    "minecraft:visual/sky_color": "#5b5a58",
+    "minecraft:visual/water_fog_color": "#17110b"
+  },
+  "carvers": [],
+  "downfall": 0.0,
+  "effects": {
+    "dry_foliage_color": "#806a3d",
+    "foliage_color": "#545e32",
+    "grass_color": "#685734",
+    "water_color": "#3d2f1f"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:patch_dead_bush",
+      "minecraft:patch_dry_grass_desert",
+      "minecraft:patch_grass_plain",
+      "lotr_craft:marigold_patch",
+      "lotr_craft:lavender_patch",
+      "lotr_craft:raspberry_bush_patch",
+      "lotr_craft:elderberry_bush_patch",
+      "minecraft:patch_cactus_desert",
+      "lotr_craft:baobab_trees_sparse",
+      "lotr_craft:mahogany_trees_sparse"
+    ],
+    []
+  ],
+  "has_precipitation": false,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 1.5
+}

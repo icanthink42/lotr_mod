@@ -1,0 +1,49 @@
+{
+  "attributes": {
+    "minecraft:visual/sky_color": "#78a7ff",
+    "minecraft:visual/water_fog_color": "#050533"
+  },
+  "carvers": [],
+  "downfall": 1.0,
+  "effects": {
+    "dry_foliage_color": "#879a47",
+    "foliage_color": "#5c973e",
+    "grass_color": "#94cd2c",
+    "water_color": "#3f76e4"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_tall_grass_2",
+      "minecraft:flower_plain",
+      "lotr_craft:elanor_patch",
+      "lotr_craft:niphredil_patch",
+      "lotr_craft:bluebell_patch",
+      "lotr_craft:clover_patch",
+      "lotr_craft:mallorn_trees_dense"
+    ],
+    []
+  ],
+  "has_precipitation": true,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 1.1
+}

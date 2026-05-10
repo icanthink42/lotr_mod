@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "lotr_craft:elanor",
+    "lotr_craft:niphredil",
+    "lotr_craft:simbelmyne",
+    "lotr_craft:shire_heather",
+    "lotr_craft:athelas",
+    "lotr_craft:bluebell",
+    "lotr_craft:clover",
+    "lotr_craft:asphodel",
+    "lotr_craft:marigold",
+    "lotr_craft:lavender",
+    "lotr_craft:flowering_grass",
+    "lotr_craft:thistle",
+    "lotr_craft:nettle",
+    "lotr_craft:fern_sprout",
+    "lotr_craft:blueberry_bush",
+    "lotr_craft:blackberry_bush",
+    "lotr_craft:raspberry_bush",
+    "lotr_craft:cranberry_bush",
+    "lotr_craft:elderberry_bush",
+    "lotr_craft:wildberry_bush"
+  ]
+}

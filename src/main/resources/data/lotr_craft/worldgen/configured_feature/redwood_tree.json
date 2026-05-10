@@ -1,0 +1,18 @@
+{
+  "config": {
+    "default": {
+      "feature": "lotr_craft:redwood_tree_small",
+      "placement": []
+    },
+    "features": [
+      {
+        "chance": 0.25,
+        "feature": {
+          "feature": "lotr_craft:redwood_tree_large",
+          "placement": []
+        }
+      }
+    ]
+  },
+  "type": "minecraft:random_selector"
+}

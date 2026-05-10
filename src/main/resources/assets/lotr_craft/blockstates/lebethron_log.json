@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "lotr_craft:block/lebethron_log_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "lotr_craft:block/lebethron_log"
+    },
+    "axis=z": {
+      "model": "lotr_craft:block/lebethron_log_horizontal",
+      "x": 90
+    }
+  }
+}
