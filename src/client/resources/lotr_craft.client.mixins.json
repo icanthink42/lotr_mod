@@ -4,7 +4,8 @@
   "package": "org.neelemv.lotr_craft.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "InventoryScreenMixin"
+    "InventoryScreenMixin",
+    "MirkwoodFogMixin"
   ],
   "injectors": {
     "defaultRequire": 1

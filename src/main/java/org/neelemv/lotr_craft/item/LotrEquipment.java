@@ -114,7 +114,7 @@ public final class LotrEquipment {
             mob.setItemSlot(EquipmentSlot.FEET, stack(armor.boots));
             mob.setItemSlot(EquipmentSlot.LEGS, stack(armor.legs));
             mob.setItemSlot(EquipmentSlot.CHEST, stack(armor.body));
-            if (kind.id().contains("captain") || kind.id().contains("soldier") || kind.id().contains("warrior") || kind.id().contains("guard") || kind.id().contains("orc") || mob.getRandom().nextInt(3) == 0) {
+            if (wearsHelmet(kind)) {
                 mob.setItemSlot(EquipmentSlot.HEAD, stack(armor.helmet));
             }
         }
@@ -178,6 +178,28 @@ public final class LotrEquipment {
             case UTUMNO -> ArmorFamily.UTUMNO;
             default -> null;
         };
+    }
+
+    private static boolean wearsHelmet(HumanoidNpcKind kind) {
+        String id = kind.id();
+        return id.contains("archer")
+                || id.contains("axeman")
+                || id.contains("blowgunner")
+                || id.contains("bombardier")
+                || id.contains("captain")
+                || id.contains("chieftain")
+                || id.contains("commander")
+                || id.contains("crossbower")
+                || id.contains("guard")
+                || id.contains("knight")
+                || id.contains("marine")
+                || id.contains("marshal")
+                || id.contains("orc")
+                || id.contains("ranger")
+                || id.contains("soldier")
+                || id.contains("uruk")
+                || id.contains("warrior")
+                || id.contains("warlord");
     }
 
     private static ItemStack stack(Weapon weapon) {
