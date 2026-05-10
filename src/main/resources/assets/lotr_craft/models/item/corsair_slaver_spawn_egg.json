@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/corsair_slaver_spawn_egg"
+  }
+}

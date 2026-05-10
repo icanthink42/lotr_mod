@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/mordor_orc_archer_spawn_egg"
+  }
+}

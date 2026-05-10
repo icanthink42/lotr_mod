@@ -2,7 +2,9 @@ package org.neelemv.lotr_craft;
 
 import org.neelemv.lotr_craft.block.LotrBlocks;
 import org.neelemv.lotr_craft.entity.HobbitKind;
+import org.neelemv.lotr_craft.entity.HumanoidNpcKind;
 import org.neelemv.lotr_craft.entity.LotrEntities;
+import org.neelemv.lotr_craft.entity.PassiveKind;
 import org.neelemv.lotr_craft.item.FactionBookItem;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
@@ -12,6 +14,9 @@ import org.neelemv.lotr_craft.network.LotrNetworking;
 import org.neelemv.lotr_craft.worldgen.LotrWorldgen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
@@ -34,6 +39,7 @@ public class Lotr_craft implements ModInitializer {
     public static final Item THE_ONE_RING = registerItem("the_one_ring", TheOneRingItem::new, new Item.Properties().stacksTo(1));
     public static final Item MIDDLE_EARTH_MAP = registerItem("middle_earth_map", MiddleEarthMapItem::new, new Item.Properties().stacksTo(1));
     public static final Item FACTION_BOOK = registerItem("faction_book", FactionBookItem::new, new Item.Properties().stacksTo(1));
+    public static final Item COMMON_NPC_SPAWN_EGG = registerItem("common_npc_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.COMMON_NPC));
     public static final Item HOBBIT_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT);
     public static final Item HOBBIT_BARTENDER_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT_BARTENDER);
     public static final Item HOBBIT_BOUNDER_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT_BOUNDER);
@@ -47,6 +53,8 @@ public class Lotr_craft implements ModInitializer {
     public static final Item BREE_HOBBIT_BUTCHER_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.BREE_HOBBIT_BUTCHER);
     public static final Item BREE_HOBBIT_BREWER_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.BREE_HOBBIT_BREWER);
     public static final Item BREE_HOBBIT_FLORIST_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.BREE_HOBBIT_FLORIST);
+    public static final List<Item> HUMANOID_NPC_SPAWN_EGGS = registerHumanoidNpcSpawnEggs();
+    public static final List<Item> PASSIVE_SPAWN_EGGS = registerPassiveSpawnEggs();
     public static final CreativeModeTab LOTR_CRAFT_TAB = registerCreativeTab();
 
     @Override
@@ -76,6 +84,7 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
                     output.accept(FACTION_BOOK);
+                    output.accept(COMMON_NPC_SPAWN_EGG);
                     output.accept(HOBBIT_SPAWN_EGG);
                     output.accept(HOBBIT_BARTENDER_SPAWN_EGG);
                     output.accept(HOBBIT_BOUNDER_SPAWN_EGG);
@@ -89,6 +98,12 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(BREE_HOBBIT_BUTCHER_SPAWN_EGG);
                     output.accept(BREE_HOBBIT_BREWER_SPAWN_EGG);
                     output.accept(BREE_HOBBIT_FLORIST_SPAWN_EGG);
+                    for (Item item : HUMANOID_NPC_SPAWN_EGGS) {
+                        output.accept(item);
+                    }
+                    for (Item item : PASSIVE_SPAWN_EGGS) {
+                        output.accept(item);
+                    }
                     output.accept(LotrBlocks.MORDOR_ROCK);
                     output.accept(LotrBlocks.GONDOR_ROCK);
                     output.accept(LotrBlocks.ROHAN_ROCK);
@@ -117,6 +132,22 @@ public class Lotr_craft implements ModInitializer {
 
     private static Item registerHobbitSpawnEgg(HobbitKind kind) {
         return registerItem(kind.id() + "_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.hobbitType(kind)));
+    }
+
+    private static List<Item> registerHumanoidNpcSpawnEggs() {
+        List<Item> items = new ArrayList<>();
+        for (HumanoidNpcKind kind : HumanoidNpcKind.values()) {
+            items.add(registerItem(kind.id() + "_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.humanoidNpcType(kind))));
+        }
+        return List.copyOf(items);
+    }
+
+    private static List<Item> registerPassiveSpawnEggs() {
+        List<Item> items = new ArrayList<>();
+        for (PassiveKind kind : PassiveKind.values()) {
+            items.add(registerItem(kind.id() + "_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.passiveType(kind))));
+        }
+        return List.copyOf(items);
     }
 
     @FunctionalInterface

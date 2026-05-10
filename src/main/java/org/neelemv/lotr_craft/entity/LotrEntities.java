@@ -16,6 +16,10 @@ import net.minecraft.world.entity.MobCategory;
 
 public final class LotrEntities {
     private static final Map<HobbitKind, EntityType<LotrHobbitEntity>> HOBBIT_TYPES = new EnumMap<>(HobbitKind.class);
+    private static final Map<PassiveKind, EntityType<LotrPassiveEntity>> PASSIVE_TYPES = new EnumMap<>(PassiveKind.class);
+    private static final Map<HumanoidNpcKind, EntityType<LotrHumanoidNpcEntity>> HUMANOID_NPC_TYPES = new EnumMap<>(HumanoidNpcKind.class);
+
+    public static final EntityType<LotrCommonNpcEntity> COMMON_NPC = registerCommonNpc();
 
     public static final EntityType<LotrHobbitEntity> HOBBIT = registerHobbit(HobbitKind.HOBBIT);
     public static final EntityType<LotrHobbitEntity> HOBBIT_BARTENDER = registerHobbit(HobbitKind.HOBBIT_BARTENDER);
@@ -31,12 +35,28 @@ public final class LotrEntities {
     public static final EntityType<LotrHobbitEntity> BREE_HOBBIT_BREWER = registerHobbit(HobbitKind.BREE_HOBBIT_BREWER);
     public static final EntityType<LotrHobbitEntity> BREE_HOBBIT_FLORIST = registerHobbit(HobbitKind.BREE_HOBBIT_FLORIST);
 
+    static {
+        for (HumanoidNpcKind kind : HumanoidNpcKind.values()) {
+            registerHumanoidNpc(kind);
+        }
+        for (PassiveKind kind : PassiveKind.values()) {
+            registerPassive(kind);
+        }
+    }
+
     private LotrEntities() {
     }
 
     public static void register() {
+        FabricDefaultAttributeRegistry.register(COMMON_NPC, LotrCommonNpcEntity.createAttributes());
+        for (EntityType<LotrHumanoidNpcEntity> type : HUMANOID_NPC_TYPES.values()) {
+            FabricDefaultAttributeRegistry.register(type, LotrHumanoidNpcEntity.createAttributes());
+        }
         for (EntityType<LotrHobbitEntity> type : HOBBIT_TYPES.values()) {
             FabricDefaultAttributeRegistry.register(type, LotrHobbitEntity.createAttributes());
+        }
+        for (Map.Entry<PassiveKind, EntityType<LotrPassiveEntity>> entry : PASSIVE_TYPES.entrySet()) {
+            FabricDefaultAttributeRegistry.register(entry.getValue(), LotrPassiveEntity.createAttributes(entry.getKey()));
         }
     }
 
@@ -46,6 +66,22 @@ public final class LotrEntities {
 
     public static EntityType<LotrHobbitEntity> hobbitType(HobbitKind kind) {
         return HOBBIT_TYPES.get(kind);
+    }
+
+    public static Iterable<EntityType<LotrHumanoidNpcEntity>> humanoidNpcTypes() {
+        return HUMANOID_NPC_TYPES.values();
+    }
+
+    public static EntityType<LotrHumanoidNpcEntity> humanoidNpcType(HumanoidNpcKind kind) {
+        return HUMANOID_NPC_TYPES.get(kind);
+    }
+
+    public static Iterable<EntityType<LotrPassiveEntity>> passiveTypes() {
+        return PASSIVE_TYPES.values();
+    }
+
+    public static EntityType<LotrPassiveEntity> passiveType(PassiveKind kind) {
+        return PASSIVE_TYPES.get(kind);
     }
 
     private static EntityType<LotrHobbitEntity> registerHobbit(HobbitKind kind) {
@@ -59,6 +95,45 @@ public final class LotrEntities {
                 .build(key);
         EntityType<LotrHobbitEntity> registered = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, type);
         HOBBIT_TYPES.put(kind, registered);
+        return registered;
+    }
+
+    private static EntityType<LotrCommonNpcEntity> registerCommonNpc() {
+        Identifier id = Identifier.fromNamespaceAndPath(Lotr_craft.MOD_ID, "common_npc");
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
+        EntityType<LotrCommonNpcEntity> type = EntityType.Builder.<LotrCommonNpcEntity>of(LotrCommonNpcEntity::new, MobCategory.CREATURE)
+                .sized(0.6F, 1.8F)
+                .eyeHeight(1.62F)
+                .clientTrackingRange(8)
+                .build(key);
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, type);
+    }
+
+    private static EntityType<LotrHumanoidNpcEntity> registerHumanoidNpc(HumanoidNpcKind kind) {
+        Identifier id = Identifier.fromNamespaceAndPath(Lotr_craft.MOD_ID, kind.id());
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
+        EntityType<LotrHumanoidNpcEntity> type = EntityType.Builder.<LotrHumanoidNpcEntity>of(
+                        (entityType, level) -> new LotrHumanoidNpcEntity(entityType, level, kind), MobCategory.CREATURE)
+                .sized(0.6F * kind.scale(), 1.8F * kind.scale())
+                .eyeHeight(1.62F * kind.scale())
+                .clientTrackingRange(8)
+                .build(key);
+        EntityType<LotrHumanoidNpcEntity> registered = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, type);
+        HUMANOID_NPC_TYPES.put(kind, registered);
+        return registered;
+    }
+
+    private static EntityType<LotrPassiveEntity> registerPassive(PassiveKind kind) {
+        Identifier id = Identifier.fromNamespaceAndPath(Lotr_craft.MOD_ID, kind.id());
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
+        EntityType<LotrPassiveEntity> type = EntityType.Builder.<LotrPassiveEntity>of(
+                        (entityType, level) -> new LotrPassiveEntity(entityType, level, kind), MobCategory.CREATURE)
+                .sized(kind.width(), kind.height())
+                .eyeHeight(kind.height() * 0.85F)
+                .clientTrackingRange(8)
+                .build(key);
+        EntityType<LotrPassiveEntity> registered = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, type);
+        PASSIVE_TYPES.put(kind, registered);
         return registered;
     }
 }

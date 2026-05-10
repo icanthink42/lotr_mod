@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/dunedain_blacksmith_spawn_egg"
+  }
+}

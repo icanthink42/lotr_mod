@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/fish_spawn_egg"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/ranger_ithilien_spawn_egg"
+  }
+}
