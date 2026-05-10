@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:near_harad"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:near_harad"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:near_harad"
+      }
+    ]
+  }
+}

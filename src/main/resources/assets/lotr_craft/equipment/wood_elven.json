@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:wood_elven"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:wood_elven"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:wood_elven"
+      }
+    ]
+  }
+}

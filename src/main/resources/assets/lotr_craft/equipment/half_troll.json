@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:half_troll"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:half_troll"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:half_troll"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:dol_guldur"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:dol_guldur"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:dol_guldur"
+      }
+    ]
+  }
+}

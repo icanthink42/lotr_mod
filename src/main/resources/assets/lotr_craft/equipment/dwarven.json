@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:dwarven"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:dwarven"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:dwarven"
+      }
+    ]
+  }
+}

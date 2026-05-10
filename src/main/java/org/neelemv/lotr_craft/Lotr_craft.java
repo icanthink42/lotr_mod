@@ -6,6 +6,7 @@ import org.neelemv.lotr_craft.entity.HumanoidNpcKind;
 import org.neelemv.lotr_craft.entity.LotrEntities;
 import org.neelemv.lotr_craft.entity.PassiveKind;
 import org.neelemv.lotr_craft.item.FactionBookItem;
+import org.neelemv.lotr_craft.item.LotrEquipment;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
 import org.neelemv.lotr_craft.item.TheOneRingItem;
@@ -39,6 +40,7 @@ public class Lotr_craft implements ModInitializer {
     public static final Item THE_ONE_RING = registerItem("the_one_ring", TheOneRingItem::new, new Item.Properties().stacksTo(1));
     public static final Item MIDDLE_EARTH_MAP = registerItem("middle_earth_map", MiddleEarthMapItem::new, new Item.Properties().stacksTo(1));
     public static final Item FACTION_BOOK = registerItem("faction_book", FactionBookItem::new, new Item.Properties().stacksTo(1));
+    public static final List<Item> EQUIPMENT_ITEMS = LotrEquipment.registerItems();
     public static final Item COMMON_NPC_SPAWN_EGG = registerItem("common_npc_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.COMMON_NPC));
     public static final Item HOBBIT_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT);
     public static final Item HOBBIT_BARTENDER_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT_BARTENDER);
@@ -66,7 +68,7 @@ public class Lotr_craft implements ModInitializer {
         LOGGER.info("Loaded {} LOTR factions", LotrFaction.values().length);
     }
 
-    private static Item registerItem(String name, ItemFactory itemFactory, Item.Properties properties) {
+    public static Item registerItem(String name, ItemFactory itemFactory, Item.Properties properties) {
         Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, name);
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
         return Registry.register(BuiltInRegistries.ITEM, key, itemFactory.create(properties.setId(key)));
@@ -84,6 +86,9 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
                     output.accept(FACTION_BOOK);
+                    for (Item item : EQUIPMENT_ITEMS) {
+                        output.accept(item);
+                    }
                     output.accept(COMMON_NPC_SPAWN_EGG);
                     output.accept(HOBBIT_SPAWN_EGG);
                     output.accept(HOBBIT_BARTENDER_SPAWN_EGG);
@@ -151,7 +156,7 @@ public class Lotr_craft implements ModInitializer {
     }
 
     @FunctionalInterface
-    private interface ItemFactory {
+    public interface ItemFactory {
         Item create(Item.Properties properties);
     }
 }

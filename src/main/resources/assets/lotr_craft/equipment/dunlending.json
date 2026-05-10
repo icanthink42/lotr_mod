@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:dunlending"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:dunlending"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:dunlending"
+      }
+    ]
+  }
+}

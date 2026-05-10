@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lotr_craft:rhun_gold"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "lotr_craft:rhun_gold"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lotr_craft:rhun_gold"
+      }
+    ]
+  }
+}

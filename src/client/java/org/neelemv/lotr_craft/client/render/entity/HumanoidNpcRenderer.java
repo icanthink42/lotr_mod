@@ -9,8 +9,11 @@ import org.neelemv.lotr_craft.entity.LotrHumanoidNpcEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.Identifier;
 
 public class HumanoidNpcRenderer extends HumanoidMobRenderer<LotrHumanoidNpcEntity, HumanoidNpcRenderState, HumanoidModel<HumanoidNpcRenderState>> {
@@ -22,6 +25,10 @@ public class HumanoidNpcRenderer extends HumanoidMobRenderer<LotrHumanoidNpcEnti
 
     protected HumanoidNpcRenderer(EntityRendererProvider.Context context, HumanoidModel<HumanoidNpcRenderState> model) {
         super(context, model, 0.5F);
+        addLayer(new HumanoidArmorLayer<>(
+                this,
+                ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(), HumanoidModel::new),
+                context.getEquipmentRenderer()));
         addLayer(new HumanoidNpcOverlayLayer(this));
     }
 
