@@ -11,6 +11,7 @@ import org.neelemv.lotr_craft.item.LotrEquipment;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
 import org.neelemv.lotr_craft.item.TheOneRingItem;
+import org.neelemv.lotr_craft.faction.PlayerAlignmentKills;
 import org.neelemv.lotr_craft.faction.LotrFaction;
 import org.neelemv.lotr_craft.network.LotrNetworking;
 import org.neelemv.lotr_craft.worldgen.LotrWorldgen;
@@ -66,6 +67,7 @@ public class Lotr_craft implements ModInitializer {
         LotrEntities.register();
         LotrNetworking.register();
         LotrCommands.register();
+        PlayerAlignmentKills.register();
         LotrWorldgen.register();
         LOGGER.info("Loaded {} LOTR factions", LotrFaction.values().length);
     }

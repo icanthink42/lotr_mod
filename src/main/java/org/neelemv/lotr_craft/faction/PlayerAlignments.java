@@ -26,6 +26,12 @@ public final class PlayerAlignments {
         }
     }
 
+    public static void add(Player player, LotrFaction faction, float alignment) {
+        if (!faction.hasFixedAlignment() && player instanceof PlayerAlignmentAccess access) {
+            access.lotr_craft$setAlignment(faction, access.lotr_craft$getAlignment(faction) + alignment);
+        }
+    }
+
     public static FactionRelation relationFor(float alignment) {
         if (alignment >= 100.0F) {
             return FactionRelation.ALLY;
@@ -52,7 +58,32 @@ public final class PlayerAlignments {
     }
 
     public static boolean isHostileTo(Player player, LotrFaction faction) {
-        return get(player, faction) < hostilityThreshold(faction);
+        float directAlignment = get(player, faction);
+        if (directAlignment >= 100.0F) {
+            return false;
+        }
+        if (directAlignment < hostilityThreshold(faction)) {
+            return true;
+        }
+        for (LotrFaction otherFaction : LotrFaction.values()) {
+            if (otherFaction == faction || !otherFaction.playerAllowed()) {
+                continue;
+            }
+            FactionRelation defaultRelation = LotrFactionRelations.relationBetween(faction, otherFaction);
+            if (isFriendlyDefaultRelation(defaultRelation) && isEnemyAlignment(get(player, otherFaction))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isFriendlyDefaultRelation(FactionRelation relation) {
+        return relation == FactionRelation.ALLY || relation == FactionRelation.FRIEND;
+    }
+
+    private static boolean isEnemyAlignment(float alignment) {
+        FactionRelation relation = relationFor(alignment);
+        return relation == FactionRelation.ENEMY || relation == FactionRelation.MORTAL_ENEMY;
     }
 
     private static float hostilityThreshold(LotrFaction faction) {
