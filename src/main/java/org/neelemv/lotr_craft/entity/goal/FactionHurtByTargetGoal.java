@@ -1,11 +1,13 @@
 package org.neelemv.lotr_craft.entity.goal;
 
 import org.neelemv.lotr_craft.entity.LotrFactioned;
+import org.neelemv.lotr_craft.faction.PlayerAlignments;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.player.Player;
 
 public class FactionHurtByTargetGoal extends HurtByTargetGoal {
     private final PathfinderMob mob;
@@ -18,14 +20,21 @@ public class FactionHurtByTargetGoal extends HurtByTargetGoal {
     @Override
     public boolean canUse() {
         LivingEntity attacker = mob.getLastHurtByMob();
-        return attacker != null && attacker instanceof LotrFactioned target && mob instanceof LotrFactioned self && LotrFactioned.areEnemies(self, target) && super.canUse();
+        return attacker != null && mob instanceof LotrFactioned self && isEnemy(self, attacker) && super.canUse();
     }
 
     @Override
     protected void alertOther(Mob other, LivingEntity attacker) {
-        if (attacker instanceof LotrFactioned target && other instanceof LotrFactioned ally && mob instanceof LotrFactioned self
-                && LotrFactioned.areAllied(self, ally) && LotrFactioned.areEnemies(ally, target) && other.canAttack(attacker)) {
+        if (other instanceof LotrFactioned ally && mob instanceof LotrFactioned self
+                && LotrFactioned.areAllied(self, ally) && isEnemy(ally, attacker) && other.canAttack(attacker)) {
             other.setTarget(attacker);
         }
+    }
+
+    private static boolean isEnemy(LotrFactioned self, LivingEntity target) {
+        if (target instanceof Player player) {
+            return !player.isCreative() && !player.isSpectator() && PlayerAlignments.isHostileTo(player, self.lotrFaction());
+        }
+        return target instanceof LotrFactioned factionedTarget && LotrFactioned.areEnemies(self, factionedTarget);
     }
 }

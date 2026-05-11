@@ -1,6 +1,7 @@
 package org.neelemv.lotr_craft;
 
 import org.neelemv.lotr_craft.block.LotrBlocks;
+import org.neelemv.lotr_craft.command.LotrCommands;
 import org.neelemv.lotr_craft.entity.HobbitKind;
 import org.neelemv.lotr_craft.entity.HumanoidNpcKind;
 import org.neelemv.lotr_craft.entity.LotrEntities;
@@ -64,6 +65,7 @@ public class Lotr_craft implements ModInitializer {
         LotrBlocks.register();
         LotrEntities.register();
         LotrNetworking.register();
+        LotrCommands.register();
         LotrWorldgen.register();
         LOGGER.info("Loaded {} LOTR factions", LotrFaction.values().length);
     }

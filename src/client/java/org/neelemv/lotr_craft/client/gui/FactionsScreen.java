@@ -5,11 +5,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.neelemv.lotr_craft.Lotr_craft;
+import org.neelemv.lotr_craft.client.ClientFactionAlignments;
 import org.neelemv.lotr_craft.faction.FactionMapRegion;
 import org.neelemv.lotr_craft.faction.FactionRegion;
+import org.neelemv.lotr_craft.faction.FactionRank;
 import org.neelemv.lotr_craft.faction.FactionRelation;
 import org.neelemv.lotr_craft.faction.LotrFaction;
 import org.neelemv.lotr_craft.faction.LotrFactionRelations;
+import org.neelemv.lotr_craft.faction.PlayerAlignments;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -37,7 +40,7 @@ public final class FactionsScreen extends Screen {
     private static final FactionRegion[] REGIONS = { FactionRegion.WEST, FactionRegion.EAST, FactionRegion.SOUTH };
 
     private FactionRegion currentRegion = FactionRegion.WEST;
-    private InfoPage currentInfoPage = InfoPage.FRIENDS;
+    private InfoPage currentInfoPage = InfoPage.ALIGNMENT;
     private int currentFactionIndex;
 
     public FactionsScreen() {
@@ -137,6 +140,12 @@ public final class FactionsScreen extends Screen {
         graphics.text(font, heading, x, y, 0xFF000000, false);
         y += 13;
 
+        if (currentInfoPage == InfoPage.ALIGNMENT) {
+            drawAlignmentPage(graphics, x, y, faction);
+            drawPageFlip(graphics, left, top);
+            return;
+        }
+
         List<LotrFaction> relations = relatedFactions(faction, currentInfoPage);
         if (relations.isEmpty()) {
             graphics.text(font, Component.translatable("faction_detail.lotr_craft.none"), x, y, TEXT_COLOR, false);
@@ -154,6 +163,27 @@ public final class FactionsScreen extends Screen {
         }
 
         drawPageFlip(graphics, left, top);
+    }
+
+    private void drawAlignmentPage(GuiGraphicsExtractor graphics, int x, int y, LotrFaction faction) {
+        float alignment = ClientFactionAlignments.get(faction);
+        FactionRelation relation = PlayerAlignments.relationFor(alignment);
+        FactionRank rank = PlayerAlignments.rankFor(faction, alignment);
+        int factionColor = 0xFF000000 | faction.color();
+
+        graphics.text(font, Component.translatable("faction_detail.lotr_craft.alignment"), x, y, TEXT_COLOR, false);
+        graphics.text(font, Component.literal(formatAlignment(alignment)), x + 64, y, factionColor, false);
+        y += 12;
+
+        graphics.text(font, Component.translatable("faction_detail.lotr_craft.relation"), x, y, TEXT_COLOR, false);
+        graphics.text(font, Component.translatable("faction_relation.lotr_craft." + relation.name().toLowerCase()), x + 64, y, relationColor(relation), false);
+        y += 12;
+
+        graphics.text(font, Component.translatable("faction_detail.lotr_craft.rank"), x, y, TEXT_COLOR, false);
+        Component rankText = rank == null
+                ? Component.translatable(alignment < 0.0F ? "faction_rank.lotr_craft.enemy" : "faction_rank.lotr_craft.neutral")
+                : Component.literal(rank.name());
+        graphics.text(font, rankText, x + 64, y, factionColor, false);
     }
 
     private void drawMapPage(GuiGraphicsExtractor graphics, int left, int top, LotrFaction faction) {
@@ -208,7 +238,7 @@ public final class FactionsScreen extends Screen {
         int index = currentRegionIndex();
         currentRegion = REGIONS[(index + 1) % REGIONS.length];
         currentFactionIndex = 0;
-        currentInfoPage = InfoPage.FRIENDS;
+        currentInfoPage = InfoPage.ALIGNMENT;
     }
 
     private int currentRegionIndex() {
@@ -244,6 +274,12 @@ public final class FactionsScreen extends Screen {
     }
 
     private enum InfoPage {
+        ALIGNMENT("faction_page.lotr_craft.alignment") {
+            @Override
+            boolean matches(FactionRelation relation) {
+                return false;
+            }
+        },
         FRIENDS("faction_page.lotr_craft.friends") {
             @Override
             boolean matches(FactionRelation relation) {
@@ -270,5 +306,19 @@ public final class FactionsScreen extends Screen {
         }
 
         abstract boolean matches(FactionRelation relation);
+    }
+
+    private static String formatAlignment(float alignment) {
+        return (alignment > 0.0F ? "+" : "") + String.format(java.util.Locale.ROOT, "%.1f", alignment);
+    }
+
+    private static int relationColor(FactionRelation relation) {
+        return switch (relation) {
+            case ALLY -> 0xFF2B7FFF;
+            case FRIEND -> 0xFF1B8D38;
+            case NEUTRAL -> TEXT_COLOR;
+            case ENEMY -> 0xFFB05A24;
+            case MORTAL_ENEMY -> 0xFF9E1515;
+        };
     }
 }

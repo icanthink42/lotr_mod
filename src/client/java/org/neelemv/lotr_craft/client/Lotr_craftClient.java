@@ -16,9 +16,11 @@ import org.neelemv.lotr_craft.client.render.entity.PassiveRenderer;
 import org.neelemv.lotr_craft.entity.HumanoidNpcKind;
 import org.neelemv.lotr_craft.entity.LotrEntities;
 import org.neelemv.lotr_craft.entity.PassiveKind;
+import org.neelemv.lotr_craft.network.FactionAlignmentSyncPayload;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -30,6 +32,7 @@ public class Lotr_craftClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LotrKeyMappings.register();
+        ClientPlayNetworking.registerGlobalReceiver(FactionAlignmentSyncPayload.TYPE, (payload, context) -> ClientFactionAlignments.replaceFrom(payload.encodedAlignments()));
         ModelLayerRegistry.registerModelLayer(CommonNpcModel.LAYER_LOCATION, CommonNpcModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(HobbitModel.LAYER_LOCATION, HobbitModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(HumanoidNpcModel.LAYER_LOCATION, HumanoidNpcModel::createBodyLayer);

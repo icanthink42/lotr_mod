@@ -1,8 +1,10 @@
 package org.neelemv.lotr_craft.network;
 
 import org.neelemv.lotr_craft.Lotr_craft;
+import org.neelemv.lotr_craft.faction.PlayerAlignments;
 import org.neelemv.lotr_craft.worldgen.MiddleEarthMapConstants;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerLevel;
@@ -14,8 +16,14 @@ public final class LotrNetworking {
     }
 
     public static void register() {
+        PayloadTypeRegistry.clientboundPlay().register(FactionAlignmentSyncPayload.TYPE, FactionAlignmentSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MiddleEarthMapTeleportPayload.TYPE, MiddleEarthMapTeleportPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MiddleEarthMapTeleportPayload.TYPE, (payload, context) -> teleportToMapPoint(context.player(), payload.mapX(), payload.mapZ()));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> syncFactionAlignments(handler.player));
+    }
+
+    public static void syncFactionAlignments(ServerPlayer player) {
+        ServerPlayNetworking.send(player, new FactionAlignmentSyncPayload(PlayerAlignments.encode(player)));
     }
 
     private static void teleportToMapPoint(ServerPlayer player, int mapX, int mapZ) {

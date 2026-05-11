@@ -6,6 +6,7 @@
   "mixins": [
     "AbstractContainerMenuInvoker",
     "InventoryMenuMixin",
+    "PlayerAlignmentMixin",
     "PlayerMixin"
   ],
   "injectors": {

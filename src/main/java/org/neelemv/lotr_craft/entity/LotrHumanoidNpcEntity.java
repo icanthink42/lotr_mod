@@ -4,6 +4,7 @@ import org.neelemv.lotr_craft.entity.goal.FactionAllyAssistGoal;
 import org.neelemv.lotr_craft.entity.goal.FactionHurtByTargetGoal;
 import org.neelemv.lotr_craft.entity.goal.FactionNearestAttackableTargetGoal;
 import org.neelemv.lotr_craft.faction.LotrFaction;
+import org.neelemv.lotr_craft.faction.PlayerAlignments;
 import org.neelemv.lotr_craft.item.LotrEquipment;
 
 import net.minecraft.server.level.ServerLevel;
@@ -78,6 +79,9 @@ public class LotrHumanoidNpcEntity extends PathfinderMob implements LotrFactione
 
     @Override
     public boolean canAttack(LivingEntity target) {
+        if (target instanceof Player player && !PlayerAlignments.isHostileTo(player, lotrFaction())) {
+            return false;
+        }
         if (target instanceof LotrFactioned factionedTarget && LotrFactioned.areFriendly(this, factionedTarget)) {
             return false;
         }
