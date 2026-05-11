@@ -5,6 +5,8 @@ import org.neelemv.lotr_craft.client.gui.FactionsScreen;
 import org.neelemv.lotr_craft.client.gui.MiddleEarthMapScreen;
 import org.neelemv.lotr_craft.client.render.entity.CommonNpcModel;
 import org.neelemv.lotr_craft.client.render.entity.CommonNpcRenderer;
+import org.neelemv.lotr_craft.client.render.entity.HalfTrollNpcModel;
+import org.neelemv.lotr_craft.client.render.entity.HalfTrollNpcRenderer;
 import org.neelemv.lotr_craft.client.render.entity.HobbitModel;
 import org.neelemv.lotr_craft.client.render.entity.HobbitRenderer;
 import org.neelemv.lotr_craft.client.render.entity.HumanoidNpcModel;
@@ -36,13 +38,19 @@ public class Lotr_craftClient implements ClientModInitializer {
         ModelLayerRegistry.registerModelLayer(CommonNpcModel.LAYER_LOCATION, CommonNpcModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(HobbitModel.LAYER_LOCATION, HobbitModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(HumanoidNpcModel.LAYER_LOCATION, HumanoidNpcModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(HalfTrollNpcModel.LAYER_LOCATION, HalfTrollNpcModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(OrcHumanoidNpcModel.LAYER_LOCATION, OrcHumanoidNpcModel::createBodyLayer);
         for (PassiveKind kind : PassiveKind.values()) {
             ModelLayerRegistry.registerModelLayer(PassiveModel.layerLocation(kind), () -> PassiveModel.createBodyLayer(kind));
         }
         EntityRendererRegistry.register(LotrEntities.COMMON_NPC, CommonNpcRenderer::new);
         for (HumanoidNpcKind kind : HumanoidNpcKind.values()) {
-            EntityRendererRegistry.register(LotrEntities.humanoidNpcType(kind), kind.skinSet().isOrc() ? OrcHumanoidNpcRenderer::new : HumanoidNpcRenderer::new);
+            switch (kind) {
+                case HALF_TROLL, HALF_TROLL_WARRIOR, HALF_TROLL_SCAVENGER, HALF_TROLL_WARLORD ->
+                    EntityRendererRegistry.register(LotrEntities.humanoidNpcType(kind), HalfTrollNpcRenderer::new);
+                default ->
+                    EntityRendererRegistry.register(LotrEntities.humanoidNpcType(kind), kind.skinSet().isOrc() ? OrcHumanoidNpcRenderer::new : HumanoidNpcRenderer::new);
+            }
         }
         for (var type : LotrEntities.hobbitTypes()) {
             EntityRendererRegistry.register(type, HobbitRenderer::new);
@@ -75,4 +83,5 @@ public class Lotr_craftClient implements ClientModInitializer {
             return InteractionResult.PASS;
         });
     }
+
 }

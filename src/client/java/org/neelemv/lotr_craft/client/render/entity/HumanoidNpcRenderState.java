@@ -9,4 +9,7 @@ public class HumanoidNpcRenderState extends HumanoidRenderState {
     public Identifier headwearTexture;
     public float scale = 0.9375F;
     public boolean orcModelFeatures;
+    public boolean halfTrollMohawk;
+    public boolean halfTrollHorns;
+    public boolean halfTrollFullHorns;
 }
