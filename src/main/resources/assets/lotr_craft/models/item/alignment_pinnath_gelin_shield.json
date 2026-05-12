@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lotr_craft:item/alignment_pinnath_gelin_shield_icon"
+  }
+}

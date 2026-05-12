@@ -104,5 +104,6 @@ public class HalfTrollNpcModel extends HumanoidModel<HumanoidNpcRenderState> {
         this.hornLeft1.visible = state.halfTrollHorns;
         this.hornRight2.visible = state.halfTrollFullHorns;
         this.hornLeft2.visible = state.halfTrollFullHorns;
+        HumanoidNpcModel.correctNpcShieldBlockPose(this, state);
     }
 }

@@ -58,4 +58,10 @@ public class OrcHumanoidNpcModel extends HumanoidModel<HumanoidNpcRenderState> {
 
         return LayerDefinition.create(mesh, 64, 32);
     }
+
+    @Override
+    public void setupAnim(HumanoidNpcRenderState state) {
+        super.setupAnim(state);
+        HumanoidNpcModel.correctNpcShieldBlockPose(this, state);
+    }
 }

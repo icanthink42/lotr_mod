@@ -12,4 +12,5 @@ public class HumanoidNpcRenderState extends HumanoidRenderState {
     public boolean halfTrollMohawk;
     public boolean halfTrollHorns;
     public boolean halfTrollFullHorns;
+    public boolean offhandShieldBlocking;
 }

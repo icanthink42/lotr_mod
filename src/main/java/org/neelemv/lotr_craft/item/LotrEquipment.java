@@ -107,8 +107,25 @@ public final class LotrEquipment {
         return stack(weaponForFamily(kind, Weapon.SWORD_IRON));
     }
 
+    public static int meleeAttackCooldownTicks(HumanoidNpcKind kind) {
+        if (isRanged(kind)) {
+            return 20;
+        }
+        Weapon weapon;
+        if (kind.id().contains("axe_thrower") || kind.id().contains("axeman") || kind.id().contains("berserker") || kind.id().contains("half_troll")) {
+            weapon = weaponForFamily(kind, Weapon.BATTLEAXE_IRON);
+        } else {
+            weapon = weaponForFamily(kind, Weapon.SWORD_IRON);
+        }
+        return weapon.attackCooldownTicks();
+    }
+
     public static void equipHumanoid(net.minecraft.world.entity.Mob mob, HumanoidNpcKind kind) {
         mob.setItemSlot(EquipmentSlot.MAINHAND, isRanged(kind) ? rangedWeaponFor(kind) : meleeWeaponFor(kind));
+        ItemStack shield = LotrShields.stackFor(kind);
+        if (!shield.isEmpty()) {
+            mob.setItemSlot(EquipmentSlot.OFFHAND, shield);
+        }
         ArmorFamily armor = armorFamily(kind);
         if (armor != null) {
             mob.setItemSlot(EquipmentSlot.FEET, stack(armor.boots));
@@ -119,7 +136,7 @@ public final class LotrEquipment {
             }
         }
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.isArmor() || slot == EquipmentSlot.MAINHAND) {
+            if (slot.isArmor() || slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
                 mob.setDropChance(slot, 0.04F);
             }
         }
@@ -274,6 +291,11 @@ public final class LotrEquipment {
 
         private boolean isBow() {
             return weaponClass == WeaponClass.BOW;
+        }
+
+        private int attackCooldownTicks() {
+            float attacksPerSecond = Math.max(0.1F, 4.0F + attackSpeed);
+            return Math.max(1, (int) Math.ceil(20.0F / attacksPerSecond));
         }
 
         private Item.Properties properties() {

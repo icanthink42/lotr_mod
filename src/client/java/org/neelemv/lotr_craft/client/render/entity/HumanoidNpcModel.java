@@ -72,5 +72,17 @@ public class HumanoidNpcModel extends HumanoidModel<HumanoidNpcRenderState> {
         this.nose.visible = state.orcModelFeatures;
         this.rightEar.visible = state.orcModelFeatures;
         this.leftEar.visible = state.orcModelFeatures;
+        correctNpcShieldBlockPose(state);
+    }
+
+    static void correctNpcShieldBlockPose(HumanoidModel<HumanoidNpcRenderState> model, HumanoidNpcRenderState state) {
+        if (!state.offhandShieldBlocking) {
+            return;
+        }
+        model.leftArm.yRot = model.head.yRot + 0.5235988F;
+    }
+
+    private void correctNpcShieldBlockPose(HumanoidNpcRenderState state) {
+        correctNpcShieldBlockPose(this, state);
     }
 }

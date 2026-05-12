@@ -8,6 +8,7 @@ import org.neelemv.lotr_craft.entity.LotrEntities;
 import org.neelemv.lotr_craft.entity.PassiveKind;
 import org.neelemv.lotr_craft.item.FactionBookItem;
 import org.neelemv.lotr_craft.item.LotrEquipment;
+import org.neelemv.lotr_craft.item.LotrShields;
 import org.neelemv.lotr_craft.item.RingItem;
 import org.neelemv.lotr_craft.item.MiddleEarthMapItem;
 import org.neelemv.lotr_craft.item.TheOneRingItem;
@@ -42,6 +43,7 @@ public class Lotr_craft implements ModInitializer {
     public static final Item THE_ONE_RING = registerItem("the_one_ring", TheOneRingItem::new, new Item.Properties().stacksTo(1));
     public static final Item MIDDLE_EARTH_MAP = registerItem("middle_earth_map", MiddleEarthMapItem::new, new Item.Properties().stacksTo(1));
     public static final Item FACTION_BOOK = registerItem("faction_book", FactionBookItem::new, new Item.Properties().stacksTo(1));
+    public static final List<Item> SHIELD_ITEMS = LotrShields.registerItems();
     public static final List<Item> EQUIPMENT_ITEMS = LotrEquipment.registerItems();
     public static final Item COMMON_NPC_SPAWN_EGG = registerItem("common_npc_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(LotrEntities.COMMON_NPC));
     public static final Item HOBBIT_SPAWN_EGG = registerHobbitSpawnEgg(HobbitKind.HOBBIT);
@@ -90,6 +92,9 @@ public class Lotr_craft implements ModInitializer {
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
                     output.accept(FACTION_BOOK);
+                    for (Item item : SHIELD_ITEMS) {
+                        output.accept(item);
+                    }
                     for (Item item : EQUIPMENT_ITEMS) {
                         output.accept(item);
                     }

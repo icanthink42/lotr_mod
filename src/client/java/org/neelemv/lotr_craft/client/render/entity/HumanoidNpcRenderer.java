@@ -14,7 +14,9 @@ import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
 
 public class HumanoidNpcRenderer extends HumanoidMobRenderer<LotrHumanoidNpcEntity, HumanoidNpcRenderState, HumanoidModel<HumanoidNpcRenderState>> {
     private static final Identifier FALLBACK_TEXTURE = texture("bree/bree_male/0.png");
@@ -47,6 +49,16 @@ public class HumanoidNpcRenderer extends HumanoidMobRenderer<LotrHumanoidNpcEnti
         state.headwearTexture = entity.kind().skinSet().headwearTexture(bits) == null ? null : texture(entity.kind().skinSet().headwearTexture(bits));
         state.scale = entity.kind().scale();
         state.orcModelFeatures = entity.kind().skinSet().isOrc();
+        state.offhandShieldBlocking = state.isUsingItem
+                && state.useItemHand == InteractionHand.OFF_HAND
+                && entity.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS);
+        float attackTime = entity.lotrAttackAnimation(partialTick);
+        if (attackTime > state.attackTime) {
+            state.attackTime = attackTime;
+            state.attackArm = entity.getMainArm();
+            state.isUsingItem = false;
+            state.offhandShieldBlocking = false;
+        }
     }
 
     @Override
