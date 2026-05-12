@@ -11,6 +11,8 @@ import org.neelemv.lotr_craft.client.render.entity.HobbitModel;
 import org.neelemv.lotr_craft.client.render.entity.HobbitRenderer;
 import org.neelemv.lotr_craft.client.render.entity.HumanoidNpcModel;
 import org.neelemv.lotr_craft.client.render.entity.HumanoidNpcRenderer;
+import org.neelemv.lotr_craft.client.render.entity.LotrCustomHelmetLayer;
+import org.neelemv.lotr_craft.client.render.entity.LotrCustomHelmetModel;
 import org.neelemv.lotr_craft.client.render.entity.OrcHumanoidNpcModel;
 import org.neelemv.lotr_craft.client.render.entity.OrcHumanoidNpcRenderer;
 import org.neelemv.lotr_craft.client.render.entity.PassiveModel;
@@ -24,9 +26,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.world.InteractionResult;
 
 public class Lotr_craftClient implements ClientModInitializer {
@@ -40,9 +46,19 @@ public class Lotr_craftClient implements ClientModInitializer {
         ModelLayerRegistry.registerModelLayer(HumanoidNpcModel.LAYER_LOCATION, HumanoidNpcModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(HalfTrollNpcModel.LAYER_LOCATION, HalfTrollNpcModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(OrcHumanoidNpcModel.LAYER_LOCATION, OrcHumanoidNpcModel::createBodyLayer);
+        for (LotrCustomHelmetModel.Variant variant : LotrCustomHelmetModel.Variant.values()) {
+            ModelLayerRegistry.registerModelLayer(variant.layer(), () -> LotrCustomHelmetModel.createLayer(variant));
+        }
         for (PassiveKind kind : PassiveKind.values()) {
             ModelLayerRegistry.registerModelLayer(PassiveModel.layerLocation(kind), () -> PassiveModel.createBodyLayer(kind));
         }
+        LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
+            if (renderer.getModel() instanceof HumanoidModel<?>) {
+                @SuppressWarnings({ "rawtypes", "unchecked" })
+                LotrCustomHelmetLayer<?, ?> layer = new LotrCustomHelmetLayer((RenderLayerParent<HumanoidRenderState, HumanoidModel<HumanoidRenderState>>) (RenderLayerParent) renderer, context);
+                helper.register(layer);
+            }
+        });
         EntityRendererRegistry.register(LotrEntities.COMMON_NPC, CommonNpcRenderer::new);
         for (HumanoidNpcKind kind : HumanoidNpcKind.values()) {
             switch (kind) {

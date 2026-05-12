@@ -4,6 +4,7 @@
   "package": "org.neelemv.lotr_craft.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "HumanoidArmorLayerMixin",
     "InventoryScreenMixin",
     "MirkwoodFogMixin"
   ],
