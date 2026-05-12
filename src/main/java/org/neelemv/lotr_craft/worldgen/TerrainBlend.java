@@ -2,14 +2,14 @@ package org.neelemv.lotr_craft.worldgen;
 
 import java.util.Arrays;
 
-record TerrainBlend(MiddleEarthTerrainProfile surfaceProfile, double baseHeight, double variation, double roughness, double waterWeight, double riverStrength, double mountainPeakHeight, double mountainInterior, double[] profileWeights) {
+record TerrainBlend(MiddleEarthTerrainProfile surfaceProfile, double waterWeight, double riverStrength, double[] profileWeights) {
     private static final double WATER_THRESHOLD = 0.35;
 
     static TerrainBlend of(MiddleEarthTerrainProfile profile) {
         double water = profile.water ? 1.0 : 0.0;
         double[] weights = new double[MiddleEarthTerrainProfile.count()];
         weights[profile.id()] = 1.0;
-        return new TerrainBlend(profile, profile.baseHeight, profile.variation, profile.roughness, water, water, profile.mountainPeakHeight(), profile.mountainPeakHeight() > 0 ? 1.0 : 0.0, weights);
+        return new TerrainBlend(profile, water, water, weights);
     }
 
     boolean water() {

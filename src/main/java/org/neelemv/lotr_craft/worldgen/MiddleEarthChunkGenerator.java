@@ -136,30 +136,21 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
         info.add("LOTR expected height: " + getTerrainHeight(pos.getX(), pos.getZ(), terrain));
+        info.add("LOTR map height: " + String.format("%.1f", SvgMiddleEarthMap.get().heightAtBlock(pos.getX(), pos.getZ())));
         info.add("LOTR river strength: " + String.format("%.3f", terrain.riverStrength()));
-        info.add("LOTR mountain interior: " + String.format("%.3f", terrain.mountainInterior()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
 
+    private static final double GLOBAL_VARIATION = 8.0;
+    private static final double GLOBAL_ROUGHNESS = 6.0;
+
     private static int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
+        double mapHeight = SvgMiddleEarthMap.get().heightAtBlock(blockX, blockZ);
         double broad = noise(blockX, blockZ, 0.0028, 1954L);
         double detail = noise(blockX, blockZ, 0.018, 1955L);
         double ridge = 1.0 - Math.abs(noise(blockX, blockZ, 0.006, 1956L));
-        double interior = terrain.mountainPeakHeight() > 0.0 ? smooth(clamp(terrain.mountainInterior(), 0.0, 1.0)) : 0.0;
-        double baseHeight = terrain.mountainPeakHeight() > 0.0 ? lerp(MiddleEarthMapConstants.SEA_LEVEL + 6.0, terrain.baseHeight(), interior) : terrain.baseHeight();
-        double variation = terrain.mountainPeakHeight() > 0.0 ? lerp(8.0, terrain.variation(), interior) : terrain.variation();
-        double roughness = terrain.mountainPeakHeight() > 0.0 ? lerp(6.0, terrain.roughness(), interior) : terrain.roughness();
-        double shaped = broad * variation + detail * roughness + ridge * roughness * 0.75;
-        double landHeight = Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, baseHeight + shaped);
-
-        if (terrain.mountainPeakHeight() > 0.0) {
-            double mountainTarget = Math.min(MiddleEarthMapConstants.WORLD_MAX_Y - 1.0, terrain.mountainPeakHeight());
-            double raisedBase = baseHeight + (mountainTarget - baseHeight) * interior;
-            double mountainVariationScale = 1.0 + interior * 3.5;
-            double mountainRidge = (1.0 - Math.abs(noise(blockX, blockZ, 0.0052, 1982L))) * roughness * interior * 2.5;
-            double mountainDetail = detail * roughness * mountainVariationScale;
-            landHeight = Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, raisedBase + broad * variation * mountainVariationScale + mountainDetail + mountainRidge);
-        }
+        double shaped = broad * GLOBAL_VARIATION + detail * GLOBAL_ROUGHNESS + ridge * GLOBAL_ROUGHNESS * 0.75;
+        double landHeight = Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, mapHeight + shaped);
 
         if (terrain.riverStrength() > 0.0) {
             double river = clamp(terrain.riverStrength(), 0.0, 1.0);
