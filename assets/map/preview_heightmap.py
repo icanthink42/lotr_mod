@@ -24,6 +24,7 @@ Dependencies:
 
 import sys
 import os
+import time
 import math
 import argparse
 import numpy as np
@@ -76,7 +77,7 @@ def load_heightmap(height_path, map_path):
 
     grid = pv.StructuredGrid(xx, yy, heights)
 
-    # UV coordinates for texturing — StructuredGrid stores points in Fortran order
+    # UV coordinates for texturing -- StructuredGrid stores points in Fortran order
     u = np.linspace(0, 1, w)
     v = np.linspace(1, 0, h)  # flip V to match flipped Y
     uu, vv = np.meshgrid(u, v)
@@ -139,121 +140,117 @@ def main():
     plotter.iren.interactor.AddObserver("KeyReleaseEvent", on_key_release)
 
     # Disable default VTK keybindings (w=wireframe, s=surface, etc.)
-    plotter.enable_trackball_style()
+    plotter.enable_terrain_style()
     plotter.iren.interactor.RemoveObservers("CharEvent")
-
-    def fly_tick(step):
-        if not keys_held:
-            return
-        cam = plotter.camera
-        pos = np.array(cam.position)
-        focal = np.array(cam.focal_point)
-        up = np.array(cam.up)
-
-        forward = focal - pos
-        forward = forward / np.linalg.norm(forward)
-        right = np.cross(forward, up)
-        right = right / np.linalg.norm(right)
-
-        delta = np.zeros(3)
-        if "w" in keys_held:
-            delta += forward * move_speed
-        if "s" in keys_held:
-            delta -= forward * move_speed
-        if "a" in keys_held:
-            delta -= right * move_speed
-        if "d" in keys_held:
-            delta += right * move_speed
-        if "space" in keys_held:
-            delta += up * move_speed
-        if "shift_l" in keys_held or "shift_r" in keys_held:
-            delta -= up * move_speed
-
-        cam.position = pos + delta
-        cam.focal_point = focal + delta
-
-        # Arrow keys rotate the camera by rotating the focal point around the position
-        rotate_speed = math.radians(1.0)
-        yaw = 0.0
-        pitch = 0.0
-        if "left" in keys_held:
-            yaw -= rotate_speed
-        if "right" in keys_held:
-            yaw += rotate_speed
-        if "up" in keys_held:
-            pitch += rotate_speed
-        if "down" in keys_held:
-            pitch -= rotate_speed
-
-        if yaw != 0.0 or pitch != 0.0:
-            fwd = focal - pos + delta
-            fwd = fwd / np.linalg.norm(fwd)
-            r = np.cross(fwd, up)
-            r = r / np.linalg.norm(r)
-            u = np.cross(r, fwd)
-
-            # Yaw: rotate forward around up
-            cos_y, sin_y = math.cos(yaw), math.sin(yaw)
-            fwd = fwd * cos_y + r * sin_y
-
-            # Pitch: rotate forward around right
-            r = np.cross(fwd, u)
-            r = r / np.linalg.norm(r)
-            cos_p, sin_p = math.cos(pitch), math.sin(pitch)
-            fwd = fwd * cos_p + u * sin_p
-
-            cam.focal_point = cam.position + fwd
-
-        plotter.render()
-
-    plotter.add_timer_event(
-        max_steps=999999999,
-        duration=16,  # ~60fps
-        callback=fly_tick,
-    )
 
     # Track file modification times
     last_height_mtime = os.path.getmtime(height_path)
     last_map_mtime = os.path.getmtime(map_path)
+    last_poll_time = time.time()
 
-    def check_file_update(step):
-        """Called every poll interval to check for file changes."""
-        nonlocal last_height_mtime, last_map_mtime, actor, mesh, texture
-        try:
-            height_mtime = os.path.getmtime(height_path)
-            map_mtime = os.path.getmtime(map_path)
-            if height_mtime != last_height_mtime or map_mtime != last_map_mtime:
-                last_height_mtime = height_mtime
-                last_map_mtime = map_mtime
-                print(f"File changed, reloading...")
-                new_mesh, new_texture = load_heightmap(height_path, map_path)
-
-                # Remove old mesh and add new one
-                plotter.remove_actor(actor)
-                actor = plotter.add_mesh(
-                    new_mesh,
-                    texture=new_texture,
-                    show_scalar_bar=False,
-                    lighting=True,
-                    smooth_shading=True,
-                )
-                mesh = new_mesh
-                texture = new_texture
-                plotter.render()
-                print("Updated.")
-        except Exception as e:
-            print(f"Reload error: {e}")
-
-    # Register the callback as a timed event
-    plotter.add_timer_event(
-        max_steps=999999999,
-        duration=int(args.poll * 1000),
-        callback=check_file_update,
-    )
-
-    print("Preview running. Edit your heightmap and save — preview will update.")
+    print("Preview running. Edit your heightmap and save -- preview will update.")
     print("Controls: WASD=fly, Space/Shift=up/down, mouse=look, scroll=zoom, q=quit")
-    plotter.show()
+
+    # Use a manual loop instead of VTK timer callbacks -- re-entrant render()
+    # calls from timer callbacks deadlock on Linux/X11.
+    plotter.show(auto_close=False, interactive_update=True)
+
+    while True:
+        if keys_held:
+            cam = plotter.camera
+            pos = np.array(cam.position)
+            focal = np.array(cam.focal_point)
+            up = np.array(cam.up)
+
+            forward = focal - pos
+            forward = forward / np.linalg.norm(forward)
+            right = np.cross(forward, up)
+            right = right / np.linalg.norm(right)
+
+            delta = np.zeros(3)
+            if "w" in keys_held:
+                delta += forward * move_speed
+            if "s" in keys_held:
+                delta -= forward * move_speed
+            if "a" in keys_held:
+                delta -= right * move_speed
+            if "d" in keys_held:
+                delta += right * move_speed
+            if "space" in keys_held:
+                delta += up * move_speed
+            if "shift_l" in keys_held or "shift_r" in keys_held:
+                delta -= up * move_speed
+
+            cam.position = pos + delta
+            cam.focal_point = focal + delta
+
+            rotate_speed = math.radians(1.0)
+            yaw = 0.0
+            pitch = 0.0
+            if "left" in keys_held:
+                yaw -= rotate_speed
+            if "right" in keys_held:
+                yaw += rotate_speed
+            if "up" in keys_held:
+                pitch += rotate_speed
+            if "down" in keys_held:
+                pitch -= rotate_speed
+
+            if yaw != 0.0 or pitch != 0.0:
+                world_up = np.array([0.0, 0.0, 1.0])
+                fwd = focal - pos + delta
+                fwd = fwd / np.linalg.norm(fwd)
+
+                if yaw != 0.0:
+                    # Rotate around world up so yaw never introduces roll
+                    cos_y, sin_y = math.cos(yaw), math.sin(yaw)
+                    fwd = (fwd * cos_y
+                           + np.cross(world_up, fwd) * sin_y
+                           + world_up * np.dot(world_up, fwd) * (1 - cos_y))
+                    fwd /= np.linalg.norm(fwd)
+
+                if pitch != 0.0:
+                    # Pitch around the horizontal right vector
+                    r = np.cross(fwd, world_up)
+                    norm_r = np.linalg.norm(r)
+                    if norm_r > 1e-6:
+                        r /= norm_r
+                        cos_p, sin_p = math.cos(pitch), math.sin(pitch)
+                        fwd = fwd * cos_p + np.cross(r, fwd) * sin_p
+                        fwd /= np.linalg.norm(fwd)
+
+                cam.focal_point = cam.position + fwd
+                cam.up = (0.0, 0.0, 1.0)
+
+        now = time.time()
+        if now - last_poll_time >= args.poll:
+            last_poll_time = now
+            try:
+                height_mtime = os.path.getmtime(height_path)
+                map_mtime = os.path.getmtime(map_path)
+                if height_mtime != last_height_mtime or map_mtime != last_map_mtime:
+                    last_height_mtime = height_mtime
+                    last_map_mtime = map_mtime
+                    print("File changed, reloading...")
+                    new_mesh, new_texture = load_heightmap(height_path, map_path)
+                    plotter.remove_actor(actor)
+                    actor = plotter.add_mesh(
+                        new_mesh,
+                        texture=new_texture,
+                        show_scalar_bar=False,
+                        lighting=True,
+                        smooth_shading=True,
+                    )
+                    mesh = new_mesh
+                    texture = new_texture
+                    print("Updated.")
+            except Exception as e:
+                print(f"Reload error: {e}")
+
+        try:
+            plotter.update(stime=16)  # ~60 fps, processes events and renders
+        except Exception:
+            break
 
 
 if __name__ == "__main__":
