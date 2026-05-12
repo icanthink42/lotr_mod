@@ -40,6 +40,8 @@ public final class LotrNetworking {
     }
 
     private static boolean hasMiddleEarthMap(ServerPlayer player) {
-        return player.getMainHandItem().getItem() == Lotr_craft.MIDDLE_EARTH_MAP || player.getOffhandItem().getItem() == Lotr_craft.MIDDLE_EARTH_MAP;
+        return player.isCreative() || player.isSpectator()
+                || player.getMainHandItem().getItem() == Lotr_craft.MIDDLE_EARTH_MAP
+                || player.getOffhandItem().getItem() == Lotr_craft.MIDDLE_EARTH_MAP;
     }
 }
