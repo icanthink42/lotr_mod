@@ -19,8 +19,7 @@ public final class SvgMiddleEarthMap {
     private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
     private static final double RIVER_SEARCH_RADIUS = 3.0;
     private static final int RIVER_SEARCH_CELL_RADIUS = 3;
-    private static final double HEIGHT_MAP_LOW = 100.0;
-    private static final double HEIGHT_MAP_HIGH = 2000.0;
+    private static final double HEIGHT_MAP_PEAK = 250.0;
     private final byte[] terrainProfiles;
     private final short[] heightMap;
 
@@ -184,7 +183,7 @@ public final class SvgMiddleEarthMap {
             return MiddleEarthMapConstants.SEA_LEVEL;
         }
         double normalized = (heightMap[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFFFF) / 65535.0;
-        return HEIGHT_MAP_LOW * Math.pow(HEIGHT_MAP_HIGH / HEIGHT_MAP_LOW, normalized);
+        return MiddleEarthMapConstants.SEA_LEVEL + normalized * (HEIGHT_MAP_PEAK - MiddleEarthMapConstants.SEA_LEVEL);
     }
 
     private static SvgMiddleEarthMap load() {
@@ -234,7 +233,7 @@ public final class SvgMiddleEarthMap {
         byte[] profiles = new byte[MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT];
         Arrays.fill(profiles, (byte) MiddleEarthTerrainProfile.OCEAN.id());
         short[] defaultHeight = new short[profiles.length];
-        short seaLevelEncoded = (short) (Math.log((double) MiddleEarthMapConstants.SEA_LEVEL / HEIGHT_MAP_LOW) / Math.log(HEIGHT_MAP_HIGH / HEIGHT_MAP_LOW) * 65535);
+        short seaLevelEncoded = 0;
         Arrays.fill(defaultHeight, seaLevelEncoded);
         return new SvgMiddleEarthMap(profiles, defaultHeight);
     }
@@ -284,7 +283,7 @@ public final class SvgMiddleEarthMap {
     private static short[] defaultHeightMap() {
         int pixelCount = MiddleEarthMapConstants.MAP_WIDTH * MiddleEarthMapConstants.MAP_HEIGHT;
         short[] heights = new short[pixelCount];
-        short seaLevelEncoded = (short) (Math.log((double) MiddleEarthMapConstants.SEA_LEVEL / HEIGHT_MAP_LOW) / Math.log(HEIGHT_MAP_HIGH / HEIGHT_MAP_LOW) * 65535);
+        short seaLevelEncoded = 0;
         Arrays.fill(heights, seaLevelEncoded);
         return heights;
     }
