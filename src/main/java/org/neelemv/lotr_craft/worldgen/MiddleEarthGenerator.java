@@ -1,23 +1,16 @@
 package org.neelemv.lotr_craft.worldgen;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.NoiseColumn;
-import net.minecraft.world.level.StructureManager;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.blending.Blender;
-import org.neelemv.lotr_craft.Lotr_craft;
 import org.neelemv.lotr_craft.block.LotrBlocks;
-import org.neelemv.lotr_craft.worldgen.noise.RidgeFbm;
+import org.neelemv.lotr_craft.worldgen.noise.Fbm;
 import org.neelemv.lotr_craft.worldgen.rng.Rng;
 
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-
-import java.util.concurrent.CompletableFuture;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public class MiddleEarthGenerator {
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
@@ -39,18 +32,14 @@ public class MiddleEarthGenerator {
     private static final BlockState DARK_OAK_LOG = Blocks.DARK_OAK_LOG.defaultBlockState();
     private static final BlockState DARK_OAK_FENCE = Blocks.DARK_OAK_FENCE.defaultBlockState();
 
-    private static final double GLOBAL_VARIATION = 8.0;
-    private static final double GLOBAL_ROUGHNESS = 6.0;
-    private static final double RIDGE_SCALE = 0.004;
-    private static final double RIDGE_AMPLITUDE = 60.0;
-
+    private final Fbm riverFbm;
     private final MiddleEarthHeight height;
 
     public MiddleEarthGenerator(Rng rng) {
+        riverFbm = new Fbm(rng.fork("river"), 3, 2.0, 0.5);
         height = new MiddleEarthHeight(rng.fork("terrain"));
     }
 
-    // NB: Must be thread-safe.
     public void generate(ChunkAccess chunk) {
         int minY = chunk.getMinY();
         int maxY = minY + chunk.getHeight();
@@ -68,6 +57,7 @@ public class MiddleEarthGenerator {
 
         Heightmap.primeHeightmaps(chunk, chunk.getPersistedStatus().heightmapsAfter());
     }
+
     public NoiseColumn generateColumn(int x, int z) {
         int minY = MiddleEarthMapConstants.WORLD_MIN_Y;
         int height = MiddleEarthMapConstants.WORLD_HEIGHT;
@@ -88,7 +78,7 @@ public class MiddleEarthGenerator {
             double river = clamp(terrain.riverStrength(), 0.0, 1.0);
             double channel = smooth(clamp((river - 0.18) / 0.82, 0.0, 1.0));
             double bank = smooth(river);
-            double riverBottom = MiddleEarthMapConstants.SEA_LEVEL - 4.0 - channel * 30.0 + noise(blockX, blockZ, 0.018, 1954L) * 2.0;
+            double riverBottom = MiddleEarthMapConstants.SEA_LEVEL - 4.0 - channel * 30.0 + riverFbm.sample(blockX * 0.018, blockZ * 0.018) * 2.0;
             double bankHeight = landHeight - bank * 10.0;
             landHeight = lerp(landHeight, Math.min(bankHeight, riverBottom), bank);
         }
@@ -280,40 +270,6 @@ public class MiddleEarthGenerator {
     }
 
     private record BridgeBlocks(BlockState deck, BlockState edge, BlockState fence) {
-    }
-
-    private static double noise(int x, int z, double scale, long salt) {
-        double nx = x * scale;
-        double nz = z * scale;
-        double a = valueNoise(nx, nz, salt);
-        double b = valueNoise(nx * 2.0 + 19.5, nz * 2.0 - 31.25, salt + 1L) * 0.5;
-        double c = valueNoise(nx * 4.0 - 7.25, nz * 4.0 + 11.75, salt + 2L) * 0.25;
-        return (a + b + c) / 1.75;
-    }
-
-    private static double valueNoise(double x, double z, long salt) {
-        int x0 = fastFloor(x);
-        int z0 = fastFloor(z);
-        double tx = smooth(x - x0);
-        double tz = smooth(z - z0);
-        double a = randomValue(x0, z0, salt);
-        double b = randomValue(x0 + 1, z0, salt);
-        double c = randomValue(x0, z0 + 1, salt);
-        double d = randomValue(x0 + 1, z0 + 1, salt);
-        return lerp(lerp(a, b, tx), lerp(c, d, tx), tz);
-    }
-
-    private static double randomValue(int x, int z, long salt) {
-        long value = x * 341873128712L + z * 132897987541L + salt * 42317861L;
-        value ^= value >>> 13;
-        value *= 1274126177L;
-        value ^= value >>> 16;
-        return ((value & 0xFFFFFF) / (double) 0x7FFFFF) - 1.0;
-    }
-
-    private static int fastFloor(double value) {
-        int i = (int) value;
-        return value < i ? i - 1 : i;
     }
 
     private static double smooth(double value) {
