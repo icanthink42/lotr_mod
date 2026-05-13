@@ -11,14 +11,19 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import org.jetbrains.annotations.NotNull;
 
 public class MiddleEarthBiomeSource extends BiomeSource {
     public static final MapCodec<MiddleEarthBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Biome.CODEC).fieldOf("biomes").forGetter(source -> source.biomesByName))
             .apply(instance, MiddleEarthBiomeSource::new));
 
-    private final Map<String, Holder<Biome>> biomesByName;
-    private final Holder<Biome> fallbackBiome;
+    private final Map<String, Holder<@NotNull Biome>> biomesByName;
+    private final Holder<@NotNull Biome> fallbackBiome;
+
+    private int cacheX = Integer.MIN_VALUE;
+    private int cacheZ = Integer.MIN_VALUE;
+    private Holder<@NotNull Biome> cacheBiome = null;
 
     public MiddleEarthBiomeSource(Map<String, Holder<Biome>> biomesByName) {
         if (biomesByName.isEmpty()) {
@@ -29,20 +34,27 @@ public class MiddleEarthBiomeSource extends BiomeSource {
     }
 
     @Override
-    protected MapCodec<? extends BiomeSource> codec() {
+    protected @NotNull MapCodec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
     @Override
-    protected Stream<Holder<Biome>> collectPossibleBiomes() {
+    protected @NotNull Stream<Holder<@NotNull Biome>> collectPossibleBiomes() {
         return biomesByName.values().stream().distinct();
     }
 
     @Override
-    public Holder<Biome> getNoiseBiome(int quartX, int quartY, int quartZ, Climate.Sampler sampler) {
+    public Holder<@NotNull Biome> getNoiseBiome(int quartX, int quartY, int quartZ, Climate.Sampler sampler) {
         int blockX = quartX << 2;
         int blockZ = quartZ << 2;
+        if (blockX == cacheX && blockZ == cacheZ) {
+            return cacheBiome;
+        }
         MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainBlendAtBlock(blockX, blockZ).biomeProfileAtBlock(blockX, blockZ);
-        return biomesByName.getOrDefault(profile.biomeName, fallbackBiome);
+        Holder<@NotNull Biome> biome = biomesByName.getOrDefault(profile.biomeName, fallbackBiome);
+        cacheX = blockX;
+        cacheZ = blockZ;
+        cacheBiome = biome;
+        return biome;
     }
 }
