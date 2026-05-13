@@ -70,10 +70,15 @@ public class MiddleEarthGenerator {
         return new NoiseColumn(minY, states);
     }
 
-    public int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
-        int maxScanY = (int) Math.ceil(height.maxHeightAtBlock(blockX, blockZ));
-        for (int y = maxScanY; y >= MiddleEarthMapConstants.WORLD_MIN_Y; y--) {
-            if (height.densityAtBlock(blockX, y, blockZ) > 0) {
+    public int getTerrainHeight(int blockX, int blockZ) {
+        return getTerrainHeight(height.column(blockX, blockZ));
+    }
+
+    private int getTerrainHeight(MiddleEarthHeight.ColumnInfo col) {
+        int minScanY = (int) Math.floor(col.minHeight());
+        int maxScanY = (int) Math.ceil(col.maxHeight());
+        for (int y = maxScanY; y >= minScanY; y--) {
+            if (col.density(y) > 0) {
                 return y;
             }
         }
@@ -81,8 +86,10 @@ public class MiddleEarthGenerator {
     }
 
     private void fillColumn(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int minY, int maxY, TerrainBlend terrain) {
+        MiddleEarthHeight.ColumnInfo col = height.column(blockX, blockZ);
         int bedrockTop = Math.min(minY + 4, maxY - 1);
-        int maxScanY = Math.min((int) Math.ceil(height.maxHeightAtBlock(blockX, blockZ)), maxY - 1);
+        int maxScanY = Math.min((int) Math.ceil(col.maxHeight()), maxY - 1);
+        int minScanY = Math.min((int) Math.floor(col.minHeight()), maxY - 1);
         MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
         boolean water = terrain.water();
 
@@ -93,7 +100,7 @@ public class MiddleEarthGenerator {
         boolean prevSolid = false;
         int depthRemaining = 0;
         for (int y = maxScanY; y > bedrockTop; y--) {
-            boolean solid = height.densityAtBlock(blockX, y, blockZ) > 0;
+            boolean solid = y < minScanY || col.density(y) > 0;
 
             if (solid && !prevSolid) {
                 depthRemaining = 5;
@@ -117,7 +124,7 @@ public class MiddleEarthGenerator {
             prevSolid = solid;
         }
 
-        int surfaceY = getTerrainHeight(blockX, blockZ, terrain);
+        int surfaceY = getTerrainHeight(col);
         applyRoad(chunk, localX, localZ, blockX, blockZ, surfaceY, minY, maxY, terrain);
     }
 
@@ -204,7 +211,7 @@ public class MiddleEarthGenerator {
             return false;
         }
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(blockX, blockZ);
-        return terrain.water() || getTerrainHeight(blockX, blockZ, terrain) < MiddleEarthMapConstants.SEA_LEVEL;
+        return terrain.water() || getTerrainHeight(blockX, blockZ) < MiddleEarthMapConstants.SEA_LEVEL;
     }
 
     private static BlockState roadState(MiddleEarthTerrainProfile profile, int blockX, int blockZ) {

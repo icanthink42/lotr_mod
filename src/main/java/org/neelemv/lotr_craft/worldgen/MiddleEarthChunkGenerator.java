@@ -103,7 +103,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         init(randomState);
 
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(x, z);
-        int terrainHeight = generator.getTerrainHeight(x, z, terrain);
+        int terrainHeight = generator.getTerrainHeight(x, z);
         if (terrain.water()) {
             return Math.max(terrainHeight, getSeaLevel() + 1);
         }
@@ -124,7 +124,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         MiddleEarthTerrainProfile profile = SvgMiddleEarthMap.get().terrainAtBlock(pos.getX(), pos.getZ());
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
-        info.add("LOTR expected height: " + generator.getTerrainHeight(pos.getX(), pos.getZ(), terrain));
+        info.add("LOTR expected height: " + generator.getTerrainHeight(pos.getX(), pos.getZ()));
         info.add("LOTR river strength: " + String.format("%.3f", terrain.riverStrength()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
