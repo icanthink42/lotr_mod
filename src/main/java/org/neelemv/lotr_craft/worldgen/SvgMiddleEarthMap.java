@@ -19,7 +19,7 @@ public final class SvgMiddleEarthMap {
     private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
     private static final double RIVER_SEARCH_RADIUS = 3.0;
     private static final int RIVER_SEARCH_CELL_RADIUS = 3;
-    private static final double HEIGHT_MAP_PEAK = 250.0;
+    private static final double HEIGHT_MAP_PEAK = 800.0;
     private final byte[] terrainProfiles;
     private final short[] heightMap;
 
