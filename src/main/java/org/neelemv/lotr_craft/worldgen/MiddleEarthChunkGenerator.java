@@ -136,7 +136,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
         info.add("LOTR expected height: " + getTerrainHeight(pos.getX(), pos.getZ(), terrain));
-        info.add("LOTR map height: " + String.format("%.1f", SvgMiddleEarthMap.get().heightAtBlock(pos.getX(), pos.getZ())));
+        info.add("LOTR height factor: " + String.format("%.1f", MiddleEarthHeight.heightAtBlock(pos.getX(), pos.getZ())));
         info.add("LOTR river strength: " + String.format("%.3f", terrain.riverStrength()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
@@ -145,7 +145,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     private static final double GLOBAL_ROUGHNESS = 6.0;
 
     private static int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
-        double mapHeight = SvgMiddleEarthMap.get().heightAtBlock(blockX, blockZ);
+        double mapHeight = MiddleEarthHeight.heightAtBlock(blockX, blockZ);
         double broad = noise(blockX, blockZ, 0.0028, 1954L);
         double detail = noise(blockX, blockZ, 0.018, 1955L);
         double ridge = 1.0 - Math.abs(noise(blockX, blockZ, 0.006, 1956L));

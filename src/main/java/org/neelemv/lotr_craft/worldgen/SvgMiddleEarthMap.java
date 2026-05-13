@@ -19,7 +19,6 @@ public final class SvgMiddleEarthMap {
     private static final int TERRAIN_BLEND_CELL_RADIUS = 6;
     private static final double RIVER_SEARCH_RADIUS = 3.0;
     private static final int RIVER_SEARCH_CELL_RADIUS = 3;
-    private static final double HEIGHT_MAP_PEAK = 800.0;
     private final byte[] terrainProfiles;
     private final short[] heightMap;
 
@@ -90,7 +89,7 @@ public final class SvgMiddleEarthMap {
                 TerrainBlend.normalizedWeights(profileWeights, totalWeight));
     }
 
-    double heightAtBlock(int blockX, int blockZ) {
+    double heightFactorAtBlock(int blockX, int blockZ) {
         double mapX = MiddleEarthMapConstants.blockToMapX(blockX);
         double mapZ = MiddleEarthMapConstants.blockToMapZ(blockZ);
         int centerX = fastFloor(mapX);
@@ -117,11 +116,12 @@ public final class SvgMiddleEarthMap {
         }
 
         if (totalWeight <= 0.0) {
-            return MiddleEarthMapConstants.SEA_LEVEL;
+            return 0.0;
         }
 
         return height / totalWeight;
     }
+
 
     public int colorAtMapPixel(int x, int z) {
         return MiddleEarthTerrainProfile.colorForId(profileIdAtMapPixel(x, z));
@@ -182,8 +182,7 @@ public final class SvgMiddleEarthMap {
         if (x < 0 || x >= MiddleEarthMapConstants.MAP_WIDTH || z < 0 || z >= MiddleEarthMapConstants.MAP_HEIGHT) {
             return MiddleEarthMapConstants.SEA_LEVEL;
         }
-        double normalized = (heightMap[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFFFF) / 65535.0;
-        return MiddleEarthMapConstants.SEA_LEVEL + normalized * (HEIGHT_MAP_PEAK - MiddleEarthMapConstants.SEA_LEVEL);
+        return (heightMap[x + z * MiddleEarthMapConstants.MAP_WIDTH] & 0xFFFF) / 65535.0;
     }
 
     private static SvgMiddleEarthMap load() {
