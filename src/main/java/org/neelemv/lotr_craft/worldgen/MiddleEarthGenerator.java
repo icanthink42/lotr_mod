@@ -44,11 +44,10 @@ public class MiddleEarthGenerator {
     private static final double RIDGE_SCALE = 0.004;
     private static final double RIDGE_AMPLITUDE = 60.0;
 
-    private final RidgeFbm ridgeFbm;
+    private final MiddleEarthHeight height;
 
     public MiddleEarthGenerator(Rng rng) {
-        Rng terrain = rng.fork("terrain");
-        ridgeFbm = new RidgeFbm(rng.fork("ridge"), 6, 2.0, 0.5, 2.0);
+        height = new MiddleEarthHeight(rng.fork("terrain"));
     }
 
     // NB: Must be thread-safe.
@@ -83,12 +82,7 @@ public class MiddleEarthGenerator {
     }
 
     public int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
-        double mapHeight = MiddleEarthHeight.heightAtBlock(blockX, blockZ);
-        double broad = noise(blockX, blockZ, 0.0028, 1954L);
-        double detail = noise(blockX, blockZ, 0.018, 1955L);
-        double ridge = 1.0 - Math.abs(noise(blockX, blockZ, 0.006, 1956L));
-        double shaped = broad * GLOBAL_VARIATION + detail * GLOBAL_ROUGHNESS + ridge;
-        double landHeight = Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, mapHeight + shaped);
+        double landHeight = height.heightAtBlock(blockX, blockZ);
 
         if (terrain.riverStrength() > 0.0) {
             double river = clamp(terrain.riverStrength(), 0.0, 1.0);

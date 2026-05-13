@@ -108,7 +108,6 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(pos.getX(), pos.getZ());
         info.add("LOTR terrain: " + profile.debugName());
         info.add("LOTR expected height: " + generator.getTerrainHeight(pos.getX(), pos.getZ(), terrain));
-        info.add("LOTR height factor: " + String.format("%.1f", MiddleEarthHeight.heightAtBlock(pos.getX(), pos.getZ())));
         info.add("LOTR river strength: " + String.format("%.3f", terrain.riverStrength()));
         info.add("LOTR map scale: 1:" + MiddleEarthMapConstants.MAP_SCALE);
     }
