@@ -2,6 +2,8 @@ package org.neelemv.lotr_craft.worldgen;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.minecraft.resources.Identifier;
 import org.neelemv.lotr_craft.Lotr_craft;
@@ -30,6 +32,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
             .apply(instance, MiddleEarthChunkGenerator::new));
 
     private volatile MiddleEarthGenerator generator;
+    private volatile ExecutorService threadPool;
 
     public MiddleEarthChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -42,8 +45,20 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
 
     private void init(RandomState randomState) {
         if (generator == null) {
-            long seed = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Lotr_craft.MOD_ID, "middle_earth")).fromSeed(0).nextLong();
-            generator = new MiddleEarthGenerator(new Rng(seed));
+            synchronized (this) {
+                if (generator == null) {
+                    threadPool = Executors.newFixedThreadPool(
+                        Math.max(1, Runtime.getRuntime().availableProcessors() - 1),
+                        r -> {
+                            Thread t = new Thread(r, "lotr-terrain");
+                            t.setDaemon(true);
+                            return t;
+                        }
+                    );
+                    long seed = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Lotr_craft.MOD_ID, "middle_earth")).fromSeed(0).nextLong();
+                    generator = new MiddleEarthGenerator(new Rng(seed));
+                }
+            }
         }
     }
 
@@ -62,8 +77,10 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
         init(randomState);
-        generator.generate(chunk);
-        return CompletableFuture.completedFuture(chunk);
+        return CompletableFuture.supplyAsync(() -> {
+            generator.generate(chunk);
+            return chunk;
+        }, threadPool);
     }
 
     @Override
