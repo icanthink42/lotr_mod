@@ -144,7 +144,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
     private static final double GLOBAL_VARIATION = 8.0;
     private static final double GLOBAL_ROUGHNESS = 6.0;
 
-    private static int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
+    private int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
         double mapHeight = MiddleEarthHeight.heightAtBlock(blockX, blockZ);
         double broad = noise(blockX, blockZ, 0.0028, 1954L);
         double detail = noise(blockX, blockZ, 0.018, 1955L);
@@ -164,7 +164,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         return (int) Math.round(landHeight);
     }
 
-    private static void fillColumn(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {
+    private void fillColumn(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {
         int bedrockTop = Math.min(minY + 4, maxY - 1);
         int top = Math.min(Math.max(surfaceY, MiddleEarthMapConstants.SEA_LEVEL), maxY - 1);
         MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
@@ -205,7 +205,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         applyRoad(chunk, localX, localZ, blockX, blockZ, surfaceY, minY, maxY, terrain);
     }
 
-    private static void applyRoad(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {
+    private void applyRoad(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int surfaceY, int minY, int maxY, TerrainBlend terrain) {
         if (!MiddleEarthRoads.isRoadAt(blockX, blockZ)) {
             return;
         }
@@ -256,7 +256,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
         return Math.floorMod(xMod + Math.floorMod(blockZ, range), range) == 0;
     }
 
-    private static BlockState connectedFence(BlockState fence, int blockX, int blockZ) {
+    private BlockState connectedFence(BlockState fence, int blockX, int blockZ) {
         return fence
                 .setValue(CrossCollisionBlock.NORTH, hasBridgeFenceAt(blockX, blockZ - 1))
                 .setValue(CrossCollisionBlock.EAST, hasBridgeFenceAt(blockX + 1, blockZ))
@@ -264,7 +264,7 @@ public class MiddleEarthChunkGenerator extends ChunkGenerator {
                 .setValue(CrossCollisionBlock.WEST, hasBridgeFenceAt(blockX - 1, blockZ));
     }
 
-    private static boolean hasBridgeFenceAt(int blockX, int blockZ) {
+    private boolean hasBridgeFenceAt(int blockX, int blockZ) {
         if (!MiddleEarthRoads.isRoadAt(blockX, blockZ) || !isRoadEdge(blockX, blockZ)) {
             return false;
         }
