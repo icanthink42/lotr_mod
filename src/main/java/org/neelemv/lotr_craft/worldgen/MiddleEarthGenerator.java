@@ -63,34 +63,26 @@ public class MiddleEarthGenerator {
         int height = MiddleEarthMapConstants.WORLD_HEIGHT;
         BlockState[] states = new BlockState[height];
         TerrainBlend terrain = SvgMiddleEarthMap.get().terrainBlendAtBlock(x, z);
-        int surfaceY = getTerrainHeight(x, z, terrain);
         for (int i = 0; i < states.length; i++) {
             int y = minY + i;
-            states[i] = stateForY(x, z, y, minY, surfaceY, terrain);
+            states[i] = stateForY(x, z, y, minY, terrain);
         }
         return new NoiseColumn(minY, states);
     }
 
     public int getTerrainHeight(int blockX, int blockZ, TerrainBlend terrain) {
-        double landHeight = height.heightAtBlock(blockX, blockZ);
-
-        if (terrain.riverStrength() > 0.0) {
-            double river = clamp(terrain.riverStrength(), 0.0, 1.0);
-            double channel = smooth(clamp((river - 0.18) / 0.82, 0.0, 1.0));
-            double bank = smooth(river);
-            double riverBottom = MiddleEarthMapConstants.SEA_LEVEL - 4.0 - channel * 30.0 + riverFbm.sample(blockX * 0.018, blockZ * 0.018) * 2.0;
-            double bankHeight = landHeight - bank * 10.0;
-            landHeight = lerp(landHeight, Math.min(bankHeight, riverBottom), bank);
+        int maxScanY = (int) Math.ceil(height.maxHeightAtBlock(blockX, blockZ));
+        for (int y = maxScanY; y >= MiddleEarthMapConstants.WORLD_MIN_Y; y--) {
+            if (height.densityAtBlock(blockX, y, blockZ) > 0) {
+                return y;
+            }
         }
-
-        return (int) Math.round(landHeight);
+        return MiddleEarthMapConstants.WORLD_MIN_Y;
     }
 
     private void fillColumn(ChunkAccess chunk, int localX, int localZ, int blockX, int blockZ, int minY, int maxY, TerrainBlend terrain) {
-        int surfaceY = getTerrainHeight(blockX, blockZ, terrain);
-
         int bedrockTop = Math.min(minY + 4, maxY - 1);
-        int top = Math.min(Math.max(surfaceY, MiddleEarthMapConstants.SEA_LEVEL), maxY - 1);
+        int maxScanY = Math.min((int) Math.ceil(height.maxHeightAtBlock(blockX, blockZ)), maxY - 1);
         MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
         boolean water = terrain.water();
 
@@ -98,52 +90,53 @@ public class MiddleEarthGenerator {
             setBlockState(chunk, localX, y, localZ, BEDROCK);
         }
 
-        int stoneTop = Math.min(surfaceY - 5, maxY - 1);
-        for (int y = bedrockTop + 1; y <= stoneTop; y++) {
-            setBlockState(chunk, localX, y, localZ, STONE);
-        }
+        boolean prevSolid = false;
+        int depthRemaining = 0;
+        for (int y = maxScanY; y > bedrockTop; y--) {
+            boolean solid = height.densityAtBlock(blockX, y, blockZ) > 0;
 
-        if (!water) {
-            int fillerBottom = Math.max(bedrockTop + 1, surfaceY - 4);
-            int fillerTop = Math.min(surfaceY - 1, maxY - 1);
-            BlockState filler = profile.filler(blockX, blockZ);
-            for (int y = fillerBottom; y <= fillerTop; y++) {
-                setBlockState(chunk, localX, y, localZ, filler);
+            if (solid && !prevSolid) {
+                depthRemaining = 5;
             }
-            if (surfaceY >= minY && surfaceY < maxY) {
-                setBlockState(chunk, localX, surfaceY, localZ, profile.top(blockX, blockZ, surfaceY, terrain.water()));
-            }
-        } else {
-            int oceanFloorTop = Math.min(surfaceY, maxY - 1);
-            for (int y = bedrockTop + 1; y <= oceanFloorTop; y++) {
+
+            if (!solid) {
+                if (y <= MiddleEarthMapConstants.SEA_LEVEL) {
+                    setBlockState(chunk, localX, y, localZ, WATER);
+                }
+            } else if (!water && depthRemaining > 0) {
+                if (depthRemaining == 5) {
+                    setBlockState(chunk, localX, y, localZ, profile.top(blockX, blockZ, y, false));
+                } else {
+                    setBlockState(chunk, localX, y, localZ, profile.filler(blockX, blockZ));
+                }
+                depthRemaining--;
+            } else {
                 setBlockState(chunk, localX, y, localZ, STONE);
             }
+
+            prevSolid = solid;
         }
 
-        int waterBottom = Math.max(surfaceY + 1, minY);
-        int waterTop = Math.min(MiddleEarthMapConstants.SEA_LEVEL, top);
-        for (int y = waterBottom; y <= waterTop; y++) {
-            setBlockState(chunk, localX, y, localZ, WATER);
-        }
-
+        int surfaceY = getTerrainHeight(blockX, blockZ, terrain);
         applyRoad(chunk, localX, localZ, blockX, blockZ, surfaceY, minY, maxY, terrain);
     }
 
-    public BlockState stateForY(int blockX, int blockZ, int y, int minY, int surfaceY, TerrainBlend terrain) {
+    public BlockState stateForY(int blockX, int blockZ, int y, int minY, TerrainBlend terrain) {
         MiddleEarthTerrainProfile profile = terrain.surfaceProfileAtBlock(blockX, blockZ);
         boolean water = terrain.water();
+        double density = height.densityAtBlock(blockX, y, blockZ);
         if (y <= minY + 4) {
             return BEDROCK;
         }
-        if (y > surfaceY) {
+        if (density < 0.0) {
             return y <= MiddleEarthMapConstants.SEA_LEVEL ? WATER : AIR;
         }
-        if (y == surfaceY && !water) {
-            return profile.top();
-        }
-        if (y >= surfaceY - 4 && !water) {
-            return profile.filler();
-        }
+        // if (y == surfaceY && !water) {
+        //     return profile.top();
+        // }
+        // if (y >= surfaceY - 4 && !water) {
+        //     return profile.filler();
+        // }
         return STONE;
     }
 
