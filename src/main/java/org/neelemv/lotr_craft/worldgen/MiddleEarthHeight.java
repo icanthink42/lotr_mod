@@ -19,7 +19,7 @@ public final class MiddleEarthHeight {
     // Amplitude in ridge-coordinate space: 0.6 ~= 60% of one ridge period.
     private static final double WARP_AMPLITUDE = 0.6;
     private static final double CLIFF_XZ_SCALE = 0.005;
-    private static final double CLIFF_Y_SCALE = 0.010;
+    private static final double CLIFF_Y_SCALE = 0.025;
 
     private final Fbm broadFbm;
     private final Fbm detailFbm;
@@ -39,8 +39,11 @@ public final class MiddleEarthHeight {
 
     public ColumnInfo column(int x, int z) {
         double factor = SvgMiddleEarthMap.get().heightFactorAtBlock(x, z);
-        double surface = surfaceHeight(x, z, factor);
-        return new ColumnInfo(x, z, factor, surface);
+        double wx = warpFbmX.sample(x * WARP_FREQ, z * WARP_FREQ);
+        double wz = warpFbmZ.sample(x * WARP_FREQ, z * WARP_FREQ);
+        double ridge = ridgeFbm.sample(x * RIDGE_SCALE + wx * WARP_AMPLITUDE, z * RIDGE_SCALE + wz * WARP_AMPLITUDE);
+        double surface = surfaceHeight(x, z, factor, ridge);
+        return new ColumnInfo(x, z, factor, surface, ridge);
     }
 
     public final class ColumnInfo {
@@ -48,12 +51,14 @@ public final class MiddleEarthHeight {
         private final int z;
         private final double factor;
         private final double surface;
+        private final double ridge;
 
-        private ColumnInfo(int x, int z, double factor, double surface) {
+        private ColumnInfo(int x, int z, double factor, double surface, double ridge) {
             this.x = x;
             this.z = z;
             this.factor = factor;
             this.surface = surface;
+            this.ridge = ridge;
         }
 
         public double approximateHeight() {
@@ -71,7 +76,8 @@ public final class MiddleEarthHeight {
         // Returns > 0 if solid, < 0 if air.
         public double density(int y) {
             double f = clamp(factor, 0.0, 1.0);
-            double cliff = cliffFbm.sample(x * CLIFF_XZ_SCALE, y * CLIFF_Y_SCALE, z * CLIFF_XZ_SCALE) * CLIFF_AMPLITUDE * (f * f);
+            double cliffAmp = CLIFF_AMPLITUDE * (f * f) * ridge;
+            double cliff = cliffFbm.sample(x * CLIFF_XZ_SCALE, y * CLIFF_Y_SCALE, z * CLIFF_XZ_SCALE) * cliffAmp;
             return surface - y + cliff;
         }
     }
@@ -93,18 +99,12 @@ public final class MiddleEarthHeight {
         return column(x, z).density(y);
     }
 
-    private double surfaceHeight(int x, int z, double factor) {
+    private double surfaceHeight(int x, int z, double factor, double ridge) {
         double mapHeight = MiddleEarthMapConstants.SEA_LEVEL + factor * (HEIGHT_MAP_PEAK - MiddleEarthMapConstants.SEA_LEVEL);
         double broad = broadFbm.sample(x * 0.0028, z * 0.0028);
         double detail = detailFbm.sample(x * 0.018, z * 0.018);
         double f = clamp(factor, 0.0, 1.0);
-        double wx = warpFbmX.sample(x * WARP_FREQ, z * WARP_FREQ);
-        double wz = warpFbmZ.sample(x * WARP_FREQ, z * WARP_FREQ);
-        double ridge = ridgeFbm.sample(
-            x * RIDGE_SCALE + wx * WARP_AMPLITUDE,
-            z * RIDGE_SCALE + wz * WARP_AMPLITUDE
-        ) * RIDGE_AMPLITUDE * (f * f * f);
-        double shaped = broad * GLOBAL_VARIATION + detail * GLOBAL_ROUGHNESS + ridge;
+        double shaped = broad * GLOBAL_VARIATION + detail * GLOBAL_ROUGHNESS + ridge * RIDGE_AMPLITUDE * (f * f * f);
         return Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, mapHeight + shaped);
     }
 
