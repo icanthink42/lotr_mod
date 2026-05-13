@@ -6,6 +6,7 @@ import org.neelemv.lotr_craft.entity.HobbitKind;
 import org.neelemv.lotr_craft.entity.HumanoidNpcKind;
 import org.neelemv.lotr_craft.entity.LotrEntities;
 import org.neelemv.lotr_craft.entity.PassiveKind;
+import org.neelemv.lotr_craft.item.DebugWandItem;
 import org.neelemv.lotr_craft.item.FactionBookItem;
 import org.neelemv.lotr_craft.item.LotrEquipment;
 import org.neelemv.lotr_craft.item.LotrShields;
@@ -39,6 +40,7 @@ public class Lotr_craft implements ModInitializer {
     public static final String MOD_ID = "lotr_craft";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    public static final Item DEBUG_WAND = registerItem("debug_wand", DebugWandItem::new, new Item.Properties().stacksTo(1));
     public static final Item GOLD_RING = registerItem("gold_ring", RingItem::new, new Item.Properties().stacksTo(1));
     public static final Item THE_ONE_RING = registerItem("the_one_ring", TheOneRingItem::new, new Item.Properties().stacksTo(1));
     public static final Item MIDDLE_EARTH_MAP = registerItem("middle_earth_map", MiddleEarthMapItem::new, new Item.Properties().stacksTo(1));
@@ -88,6 +90,7 @@ public class Lotr_craft implements ModInitializer {
                 .title(Component.translatable("itemGroup.lotr_craft"))
                 .icon(() -> new ItemStack(GOLD_RING))
                 .displayItems((parameters, output) -> {
+                    output.accept(DEBUG_WAND);
                     output.accept(GOLD_RING);
                     output.accept(THE_ONE_RING);
                     output.accept(MIDDLE_EARTH_MAP);
