@@ -264,16 +264,4 @@ public class MiddleEarthGenerator {
 
     private record BridgeBlocks(BlockState deck, BlockState edge, BlockState fence) {
     }
-
-    private static double smooth(double value) {
-        return value * value * value * (value * (value * 6.0 - 15.0) + 10.0);
-    }
-
-    private static double lerp(double a, double b, double delta) {
-        return a + (b - a) * delta;
-    }
-
-    private static double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
-    }
 }
