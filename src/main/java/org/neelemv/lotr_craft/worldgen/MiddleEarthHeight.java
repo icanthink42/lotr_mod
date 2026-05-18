@@ -27,12 +27,8 @@ public final class MiddleEarthHeight {
         double mapHeight = MiddleEarthMapConstants.SEA_LEVEL + factor * (HEIGHT_MAP_PEAK - MiddleEarthMapConstants.SEA_LEVEL);
         double broad = broadFbm.sample(blockX * 0.0028, blockZ * 0.0028);
         double detail = detailFbm.sample(blockX * 0.018, blockZ * 0.018);
-        double ridge = ridgeFbm.sample(blockX * RIDGE_SCALE, blockZ * RIDGE_SCALE) * RIDGE_AMPLITUDE * clamp(factor, 0.0, 1.0);
+        double ridge = ridgeFbm.sample(blockX * RIDGE_SCALE, blockZ * RIDGE_SCALE) * RIDGE_AMPLITUDE * Math.clamp(factor, 0.0, 1.0);
         double shaped = broad * GLOBAL_VARIATION + detail * GLOBAL_ROUGHNESS + ridge;
         return Math.max(MiddleEarthMapConstants.SEA_LEVEL - 2, mapHeight + shaped);
-    }
-
-    private static double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
     }
 }
